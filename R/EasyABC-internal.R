@@ -4403,7 +4403,8 @@
 
 ## sequential algorithm of Lenormand et al. 2012
 .ABC_Lenormand_cluster <- function(model, prior, prior_test, nb_simul, summary_stat_target, 
-    n_cluster, verbose, alpha = 0.5, p_acc_min = 0.05, dist_weights=NULL, seed_count = 0, inside_prior = TRUE, 
+    n_cluster, verbose, alpha = 0.5, p_acc_min = 0.05, dist_weights=NULL, seed_count = 0, 
+    inside_prior = TRUE, 
     progress_bar = FALSE, max_pick=10000) {
     ## checking errors in the inputs
     if (!is.vector(alpha)) 
@@ -4592,12 +4593,19 @@
         stop("For parallel implementations, you must specify the option 'use_seed=TRUE' and modify your model accordingly - see the package's vignette for more details.")
     }
     options(scipen = 50)
-    return(switch(EXPR = method, Beaumont = .ABC_PMC_cluster(model, prior, prior_test, 
-        nb_simul, summary_stat_target, n_cluster, verbose, dist_weights=dist_weights , ...), Drovandi = .ABC_Drovandi_cluster(model, 
-        prior, nb_simul, summary_stat_target, n_cluster, verbose, dist_weights=dist_weights, ...), Delmoral = .ABC_Delmoral_cluster(model, 
-        prior, prior_test, nb_simul, summary_stat_target, n_cluster, verbose, dist_weights=dist_weights, ...), 
-        Lenormand = .ABC_Lenormand_cluster(model, prior, prior_test, nb_simul, summary_stat_target, 
-            n_cluster, verbose, dist_weights=dist_weights, ...)))
+    return(switch(EXPR = method, 
+                  Beaumont = .ABC_PMC_cluster(model, prior, prior_test, 
+                    nb_simul, summary_stat_target, n_cluster, verbose, 
+                    dist_weights=dist_weights, ...), 
+                  Drovandi = .ABC_Drovandi_cluster(model, 
+                    prior, nb_simul, summary_stat_target, n_cluster, verbose, 
+                    dist_weights=dist_weights,  ...), 
+                Delmoral = .ABC_Delmoral_cluster(model, 
+                    prior, prior_test, nb_simul, summary_stat_target, n_cluster, 
+                    verbose, dist_weights=dist_weights, ...), 
+                Lenormand = .ABC_Lenormand_cluster(model, prior, prior_test, 
+                    nb_simul, summary_stat_target, n_cluster, verbose, 
+                    dist_weights=dist_weights, ...)))
     options(scipen = 0)
 }
 
