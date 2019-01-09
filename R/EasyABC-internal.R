@@ -4141,9 +4141,9 @@
 
 ## function to sample in the prior distributions using a Latin Hypercube sample
 .ABC_rejection_lhs_cluster <- function(model, prior, prior_test, nb_simul, seed_count, 
-    n_cluster) {
+    n_cluster, cl) {
     # library(lhs)
-    cl <- makeCluster(getOption("cl.cores", n_cluster))
+    # cl <- makeCluster(getOption("cl.cores", n_cluster))
     tab_simul_summarystat = NULL
     tab_param = NULL
     list_param = list(NULL)
@@ -4205,9 +4205,9 @@
         for (i in 1:n_end) {
             tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
         }
-        stopCluster(cl)
+        # stopCluster(cl)
     } else {
-        stopCluster(cl)
+        # stopCluster(cl)
     }
     options(scipen = 0)
     cbind(tab_param, tab_simul_summarystat)
@@ -4216,11 +4216,11 @@
 ## function to perform ABC simulations from a non-uniform prior (derived from a
 ## set of particles)
 .ABC_launcher_not_uniformc_cluster <- function(model, prior, param_previous_step, 
-    tab_weight, nb_simul, seed_count, inside_prior, n_cluster, max_pick=10000) {
+    tab_weight, nb_simul, seed_count, inside_prior, n_cluster, cl, max_pick=10000) {
     tab_simul_summarystat = NULL
     tab_param = NULL
     k_acc = 0
-    cl <- makeCluster(getOption("cl.cores", n_cluster))
+    # cl <- makeCluster(getOption("cl.cores", n_cluster))
     list_param = list(NULL)
     npar = floor(nb_simul/(100 * n_cluster))
     n_end = nb_simul - (npar * 100 * n_cluster)
@@ -4290,7 +4290,7 @@
             tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
         }
     }
-    stopCluster(cl)
+    # stopCluster(cl)
     list(cbind(tab_param, tab_simul_summarystat), nb_simul/k_acc)
 }
 
@@ -4403,7 +4403,7 @@
 
 ## sequential algorithm of Lenormand et al. 2012
 .ABC_Lenormand_cluster <- function(model, prior, prior_test, nb_simul, summary_stat_target, 
-    n_cluster, verbose, alpha = 0.5, p_acc_min = 0.05, dist_weights=NULL, seed_count = 0, 
+    n_cluster, verbose, alpha = 0.5, p_acc_min = 0.05, dist_weights=NULL, cl, seed_count = 0, 
     inside_prior = TRUE, 
     progress_bar = FALSE, max_pick=10000) {
     ## checking errors in the inputs
@@ -4445,7 +4445,7 @@
     n_alpha = ceiling(nb_simul * alpha)
     ## step 1 ABC rejection step with LHS
     tab_ini = .ABC_rejection_lhs_cluster(model, prior, prior_test, nb_simul, seed_count, 
-        n_cluster)
+        n_cluster, cl)
     # initially, weights are equal
     tab_weight = array(1, n_alpha)
     if (verbose == TRUE) {
@@ -4494,7 +4494,7 @@
         simul_below_tol2 = NULL
         tab_inic = .ABC_launcher_not_uniformc_cluster(model, prior, as.matrix(as.matrix(simul_below_tol)[, 
             1:nparam]), tab_weight/sum(tab_weight), nb_simul_step, seed_count, inside_prior, 
-            n_cluster, max_pick)
+            n_cluster, cl, max_pick)
         tab_ini = as.matrix(tab_inic[[1]])
         tab_ini = as.numeric(tab_ini)
         dim(tab_ini) = c(nb_simul_step, (nparam + nstat))
@@ -4588,7 +4588,7 @@
 ## Deffuant G. (2012). Adaptive approximate Bayesian computation for complex
 ## models, submitted to Comput. Stat. )
 .ABC_sequential_cluster <- function(method, model, prior, prior_test, nb_simul, summary_stat_target, 
-    n_cluster, use_seed, verbose, dist_weights=NULL, ...) {
+    n_cluster, use_seed, verbose, dist_weights=NULL, cl, ...) {
     if (use_seed == FALSE) {
         stop("For parallel implementations, you must specify the option 'use_seed=TRUE' and modify your model accordingly - see the package's vignette for more details.")
     }
@@ -4596,16 +4596,16 @@
     return(switch(EXPR = method, 
                   Beaumont = .ABC_PMC_cluster(model, prior, prior_test, 
                     nb_simul, summary_stat_target, n_cluster, verbose, 
-                    dist_weights=dist_weights, ...), 
+                    dist_weights=dist_weights, cl, ...), 
                   Drovandi = .ABC_Drovandi_cluster(model, 
                     prior, nb_simul, summary_stat_target, n_cluster, verbose, 
-                    dist_weights=dist_weights,  ...), 
+                    dist_weights=dist_weights, cl,  ...), 
                 Delmoral = .ABC_Delmoral_cluster(model, 
                     prior, prior_test, nb_simul, summary_stat_target, n_cluster, 
-                    verbose, dist_weights=dist_weights, ...), 
+                    verbose, dist_weights=dist_weights, cl, ...), 
                 Lenormand = .ABC_Lenormand_cluster(model, prior, prior_test, 
                     nb_simul, summary_stat_target, n_cluster, verbose, 
-                    dist_weights=dist_weights, ...)))
+                    dist_weights=dist_weights, cl, ...)))
     options(scipen = 0)
 }
 

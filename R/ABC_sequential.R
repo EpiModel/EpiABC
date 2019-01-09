@@ -357,7 +357,7 @@
 #' 
 #' @export ABC_sequential
 ABC_sequential <- function(method, model, prior, nb_simul, summary_stat_target, prior_test = NULL, 
-    n_cluster = 1, use_seed = FALSE, verbose = FALSE, dist_weights=NULL, ...) {
+    n_cluster = 1, use_seed = FALSE, verbose = FALSE, dist_weights=NULL, cl, ...) {
     ## checking errors in the inputs
     if (missing(method)) 
         stop("'method' is missing")
@@ -414,7 +414,7 @@ ABC_sequential <- function(method, model, prior, nb_simul, summary_stat_target, 
                  and modify your model accordingly - see the package's vignette for more details.")
         }
         sequential = .ABC_sequential_cluster(method, model, prior, prior_test, nb_simul, 
-            summary_stat_target, n_cluster, use_seed, verbose, dist_weights=dist_weights, ...)
+            summary_stat_target, n_cluster, use_seed, verbose, dist_weights=dist_weights, cl, ...)
     }
     sequential
 } 
