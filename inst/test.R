@@ -1,18 +1,18 @@
 
 sum_stat_obs <- c(100, 2.5, 20, 30000)
-toy_model_parallel <- function(x){ 
+toy_model_parallel <- function(x){
   set.seed(x[1])
   2 * x[2] + 5 + rnorm(1,0,0.1) }
 sum_stat_obs <- 6.5
 toy_prior <- list(c("unif",0,1))
 
-fit <- ABC_sequential(method = "Lenormand", 
-                      model = toy_model_parallel, 
+fit <- ABC_sequential(method = "Lenormand",
+                      model = toy_model_parallel,
                       prior = toy_prior,
-                      nb_simul = 100, 
-                      summary_stat_target = sum_stat_obs, 
-                      p_acc_min = 0.05, 
-                      use_seed = TRUE, 
+                      nb_simul = 100,
+                      summary_stat_target = sum_stat_obs,
+                      p_acc_min = 0.05,
+                      use_seed = TRUE,
                       n_cluster = 95)
 fit
 hist(fit$param, breaks = 20)
@@ -51,3 +51,23 @@ system.time({
   stopCluster(cl)
 })
 d
+
+
+
+cluster <- makeCluster(4)
+
+toy_model_parallel <- function(x){
+  set.seed(x[1])
+  2 * x[2] + 5 + rnorm(1,0,0.1) }
+sum_stat_obs <- 6.5
+toy_prior <- list(c("unif",0,1))
+
+fit <- ABC_sequential(method = "Lenormand",
+                      model = toy_model_parallel,
+                      prior = toy_prior,
+                      nb_simul = 1000,
+                      summary_stat_target = sum_stat_obs,
+                      p_acc_min = 0.05,
+                      use_seed = TRUE,
+                      n_cluster = 95,
+                      cl = cluster)
