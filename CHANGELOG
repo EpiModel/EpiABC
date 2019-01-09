@@ -1,0 +1,52 @@
+== EasyABC changelog ==
+
+=== Version 1.5 ===
+  
+  * new algorithm introduced by Carlo Albert: Simulated Annealing
+  * bugfix in Delmoral implementation distance computation (thanks to Milton Pifano)
+  * bugfixes from Stephen Nawara
+
+=== Version 1.4 ===
+
+  * optional weighted euclidean distance (suggested by Wim Delva and Maxime Lenormand)
+  * new method based on emulation
+  * bugfixes in cluster mode
+  * bugfix: NA values for summary statistics are excluded from the computed points
+
+=== Version 1.3.1 ===
+
+  * bugfix in cluster mode for MCMC functions
+  * feature restored: constants description in prior
+
+=== Version 1.3 ===
+
+  * bugfix in compute_dist methods (thanks to Matteo Fasiolo): variance is now fixed in a better way
+  * some code optimizations thanks to Matteo Fasiolo
+  * possibility to use user-defined prior distributions
+  * possibility to add constraints to prior distributions (e.g. parameter 1 < parameter 2)
+  * examples of how to link Java models or shell scripts to EasyABC
+
+=== Version 1.2.2 - 3 June 2013 ===
+
+  * bugfix in data reading from system call in binary_model function (bug reported by Albert Ko)
+  * fixes for line width compliance with R-devel
+
+=== Version 1.2.1 - 17 May 2013 ===
+
+  * compilation fix for Solaris
+
+=== Version 1.2 - 27 February 2013 ===
+
+  * intermediary results are stored in a list for sequential algorithms (with the option verbose=TRUE)
+  * various minor corrections in the help files and in the vignette.
+
+=== Version 1.1 - 29 January 2013 ===
+
+  * simple toy model introduced for better examples
+  * algorithm parameters have now default values
+  * use_seed parameter is now set to False by default
+  * four prior distributions are now availables: uniform, normal, lognormal and exponential
+  * verbose mode enhanced
+  * tigher integration of package abc for rejection method
+  * bugfix: data handling when model take only one parameter
+  
