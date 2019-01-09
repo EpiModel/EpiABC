@@ -1,17 +1,17 @@
 Package: EasyABCMPI
 Type: Package
 Title: Efficient Approximate Bayesian Computation Sampling Schemes
+Description: Enables launching a series of simulations of a computer code from the 
+    R session, and to retrieve the simulation outputs in an appropriate format for 
+    post-processing treatments. Five sequential sampling schemes and three coupled-to-MCMC 
+    schemes are implemented.
 Version: 1.0
 Date: 2019-01-08
 Author: Franck Jabot, Thierry Faure, Nicolas Dumoulin, Carlo Albert.
 Maintainer: Nicolas Dumoulin <nicolas.dumoulin@irstea.fr>
 Depends: R (>= 2.14.0), abc
 Imports: pls, mnormt, MASS, parallel, lhs, tensorA
-Description: Enables launching a series of simulations of a computer code from the 
-    R session, and to retrieve the simulation outputs in an appropriate format for 
-    post-processing treatments. Five sequential sampling schemes and three coupled-to-MCMC 
-    schemes are implemented.
 License: GPL-3
 LazyLoad: yes
 RoxygenNote: 6.1.1
-Encoding: UTF-8 
+Encoding: UTF-8

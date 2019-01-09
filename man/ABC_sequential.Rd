@@ -6,7 +6,7 @@
 \usage{
 ABC_sequential(method, model, prior, nb_simul, summary_stat_target,
   prior_test = NULL, n_cluster = 1, use_seed = FALSE,
-  verbose = FALSE, dist_weights = NULL, ...)
+  verbose = FALSE, dist_weights = NULL, cl, ...)
 }
 \arguments{
 \item{method}{a character string indicating the sequential algorithm to be
@@ -357,7 +357,7 @@ inside_prior is to \code{TRUE}.  \code{10000} by default.  } }
     ABC_Lenormand<-ABC_sequential(method="Lenormand", model=toy_model_parallel, prior=toy_prior,
     nb_simul=20, summary_stat_target=sum_stat_obs, p_acc_min=pacc, use_seed=TRUE, n_cluster=2)
     ABC_Lenormand
- }\%dontrun
+ }
 
 }
 \references{

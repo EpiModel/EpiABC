@@ -105,7 +105,7 @@ an associated sample from the likelihood.
 }
 \examples{
 
- \dontrun{ 
+\dontrun{ 
 ## Example for "noninformative" case
 # Prior is uniform on [-10,10]
 d.prior <- function(par)
@@ -121,10 +121,10 @@ f.dist <- function(par)
 res <- SABC(f.dist,r.prior,d.prior,n.sample=500,eps.init=2,iter.max=50000)
  }\%dontrun
 
- \dontrun{\%
+\dontrun{
 # Histogram of results
 hist(res$E[,1],breaks=200)
- }
+}
 
 }
 \references{

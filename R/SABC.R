@@ -18,8 +18,6 @@
 ## VALUES:
 ## Output of function SABC.noninf() or SABC.inf()
 
-
-
 #' Simulated Annealing approach to Approximate Bayesian Computation (SABC)
 #' 
 #' Algorithms for the Simulated Annealing approach to Approximate Bayesian
@@ -103,7 +101,7 @@
 #' semi-automatic approximate Bayesian computation}.
 #' @examples
 #' 
-#'  \dontrun{ 
+#' \dontrun{ 
 #' ## Example for "noninformative" case
 #' # Prior is uniform on [-10,10]
 #' d.prior <- function(par)
@@ -119,10 +117,10 @@
 #' res <- SABC(f.dist,r.prior,d.prior,n.sample=500,eps.init=2,iter.max=50000)
 #'  }%dontrun
 #' 
-#'  \dontrun{%
+#' \dontrun{
 #' # Histogram of results
 #' hist(res$E[,1],breaks=200)
-#'  }
+#' }
 #' 
 #' @export SABC
 SABC <- function(r.model, r.prior, d.prior, 
