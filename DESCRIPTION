@@ -10,15 +10,15 @@ Author: Franck Jabot, Thierry Faure, Nicolas Dumoulin, Carlo Albert.
 Maintainer: Samuel Jenness <samuel.m.jenness@emory.edu>
 License: GPL-3
 Depends: 
-    R (>= 2.14.0), 
+    R (>= 2.14.0),
     abc,
     snow
 Imports: 
-    pls, 
-    mnormt, 
-    MASS, 
-    parallel, 
-    lhs, 
+    pls,
+    mnormt,
+    MASS,
+    parallel,
+    lhs,
     tensorA
 Suggests:
     Rmpi
