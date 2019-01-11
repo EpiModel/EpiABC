@@ -209,8 +209,7 @@
 ## function to sample in the prior distributions using a Latin Hypercube sample
 .ABC_rejection_lhs_cluster <- function(model, prior, prior_test, nb_simul, seed_count,
                                        n_cluster, cl) {
-  # library(lhs)
-  # cl <- makeCluster(getOption("cl.cores", n_cluster))
+
   tab_simul_summarystat = NULL
   tab_param = NULL
   list_param = list(NULL)
@@ -231,9 +230,9 @@
           param = .sample_prior(prior, prior_test)
         } else {
           for (j in 1:l) {
-            param[j] = as.numeric(prior[[j]]$sampleArgs[2]) + (as.numeric(prior[[j]]$sampleArgs[3]) -
-                                                                 as.numeric(prior[[j]]$sampleArgs[2])) * random_tab[((irun -
-                                                                                                                        1) * 100 * n_cluster + i), j]
+            param[j] = as.numeric(prior[[j]]$sampleArgs[2]) +
+              (as.numeric(prior[[j]]$sampleArgs[3]) - as.numeric(prior[[j]]$sampleArgs[2])) *
+              random_tab[((irun - 1) * 100 * n_cluster + i), j]
           }
         }
         # if (use_seed) # NB: we force the value use_seed=TRUE
@@ -257,12 +256,11 @@
         param = .sample_prior(prior, prior_test)
       } else {
         for (j in 1:l) {
-          param[j] = as.numeric(prior[[j]]$sampleArgs[2]) + (as.numeric(prior[[j]]$sampleArgs[3]) -
-                                                               as.numeric(prior[[j]]$sampleArgs[2])) * random_tab[(npar * 100 *
-                                                                                                                     n_cluster + i), j]
+          param[j] = as.numeric(prior[[j]]$sampleArgs[2]) +
+            (as.numeric(prior[[j]]$sampleArgs[3]) - as.numeric(prior[[j]]$sampleArgs[2])) *
+            random_tab[(npar * 100 * n_cluster + i), j]
         }
       }
-      # if (use_seed) # NB: we force the value use_seed=TRUE
       param = c((seed_count + i), param)
       list_param[[i]] = param
       tab_param = rbind(tab_param, param[2:(l + 1)])
@@ -276,6 +274,7 @@
   } else {
     # stopCluster(cl)
   }
+  browser()
   options(scipen = 0)
   cbind(tab_param, tab_simul_summarystat)
 }
@@ -304,7 +303,9 @@
           param_picked = .particle_pick(param_previous_step, tab_weight)
           # move it
           # only variable parameters are moved, computation of a WEIGHTED variance
-          param_moved = .move_particle(as.numeric(param_picked), 2*cov.wt(as.matrix(as.matrix(param_previous_step)),as.vector(tab_weight))$cov)
+          param_moved = .move_particle(as.numeric(param_picked),
+                                       2*cov.wt(as.matrix(as.matrix(param_previous_step)),
+                                                as.vector(tab_weight))$cov)
           if ((!inside_prior) || (.is_included(param_moved, prior)) || (counter >= max_pick)) {
             break
           }
@@ -338,8 +339,10 @@
         # pick a particle
         param_picked = .particle_pick(param_previous_step, tab_weight)
         # move it
-        param_moved = .move_particle(as.numeric(param_picked), 2 * cov.wt(as.matrix(as.matrix(param_previous_step)),
-                                                                          as.vector(tab_weight))$cov)  # only variable parameters are moved, computation of a WEIGHTED variance
+        # only variable parameters are moved, computation of a WEIGHTED variance
+        param_moved = .move_particle(as.numeric(param_picked),
+                                     2 * cov.wt(as.matrix(as.matrix(param_previous_step)),
+                                                as.vector(tab_weight))$cov)
         if ((!inside_prior) || (.is_included(param_moved, prior)) || (counter >= max_pick)) {
           break
         }
