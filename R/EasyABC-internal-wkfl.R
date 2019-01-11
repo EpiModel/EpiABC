@@ -60,6 +60,7 @@
   if (progress_bar) {
     print("## Lenormand et al. (2012)'s algorithm ##")
   }
+
   seed_count_ini = seed_count
   nparam = length(prior)
   nstat = length(summary_stat_target)
@@ -67,14 +68,11 @@
     stop("Prior distributions must be uniform to use the Lenormand et al. (2012)'s algorithm.")
   }
   n_alpha = ceiling(nb_simul * alpha)
+
   ## step 1 ABC rejection step with LHS
   tab_ini = .ABC_rejection_lhs_cluster(model, prior, prior_test, nb_simul, seed_count, n_cluster, cl)
   # initially, weights are equal
   tab_weight = array(1, n_alpha)
-  if (verbose == TRUE) {
-    write.table(as.matrix(cbind(tab_weight, tab_ini)), file = "model_step1",
-                row.names = F, col.names = F, quote = F)
-  }
   seed_count = seed_count + nb_simul
   # determination of the normalization constants in each dimension associated to
   # each summary statistic, this normalization will not change during all the
@@ -102,6 +100,7 @@
   if (progress_bar) {
     print("step 1 completed")
   }
+
   ## following steps
   p_acc = p_acc_min + 1
   nb_simul_step = nb_simul - n_alpha
@@ -157,6 +156,7 @@
       print(paste("Step ", it, " Completed: p_acc = ", p_acc, sep = ""))
     }
   }
+
   final_res = NULL
   final_res = list(param = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
                    stats = as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
@@ -202,6 +202,7 @@
     tab_param = rbind(tab_param, param[2:(l + 1)])
   }
   seed_count = seed_count + nb_simul
+  browser()
   list_simul_summarystat = parLapplyLB(cl, list_param, model)
   for (i in 1:nb_simul) {
     tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
@@ -216,7 +217,7 @@
 ## set of particles)
 .ABC_launcher_not_uniformc_cluster <- function(model, prior, param_previous_step,
                                                tab_weight, nb_simul, seed_count,
-                                               inside_prior, n_cluster, cl, max_pick=10000) {
+                                               inside_prior, n_cluster, cl, max_pick = 10000) {
   tab_simul_summarystat = NULL
   tab_param = NULL
   k_acc = 0
