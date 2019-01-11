@@ -69,7 +69,7 @@ a <- EasyABC::ABC_sequential(method = "Lenormand",
 # stopCluster(cluster)
 
 
-nb_simul <- 10000
-n_cluster <- 4
+nb_simul <- 200
+n_cluster <- 95
 ( npar = floor(nb_simul/(100 * n_cluster)) )
 ( n_end = nb_simul - (npar * 100 * n_cluster) )

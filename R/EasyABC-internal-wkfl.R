@@ -58,7 +58,7 @@
     stop("'inside_prior' has to be boolean.")
   start = Sys.time()
   if (progress_bar) {
-    print("    ------ Lenormand et al. (2012)'s algorithm ------")
+    print("## Lenormand et al. (2012)'s algorithm ##")
   }
   seed_count_ini = seed_count
   nparam = length(prior)
@@ -87,29 +87,18 @@
                           .selec_simul_alpha(summary_stat_target,
                                              tab_ini[, 1:nparam],
                                              tab_ini[, (nparam + 1):(nparam + nstat)], sd_simul,
-                                             alpha, dist_weights=dist_weights))
+                                             alpha, dist_weights = dist_weights))
   # to be sure that there are not two or more simulations at a distance equal
   #   to the tolerance determined by the quantile
   simul_below_tol = simul_below_tol[1:n_alpha, ]
   tab_dist = .compute_dist(summary_stat_target,
                            as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
-                           sd_simul, dist_weights=dist_weights)
+                           sd_simul, dist_weights = dist_weights)
   if (!is.null(dist_weights)) {
     tab_dist = tab_dist * (dist_weights/sum(dist_weights))
   }
   tol_next = max(tab_dist)
   intermediary_steps = list(NULL)
-  if (verbose == TRUE) {
-    write.table(cbind(tab_weight, simul_below_tol), file = "output_step1", row.names = F,
-                col.names = F, quote = F)
-    write.table(as.numeric(seed_count - seed_count_ini), file = "n_simul_tot_step1",
-                row.names = F, col.names = F, quote = F)
-    write.table(as.numeric(tol_next), file = "tolerance_step1", row.names = F,
-                col.names = F, quote = F)
-    intermediary_steps[[1]] = list(n_simul_tot = as.numeric(seed_count - seed_count_ini),
-                                   tol_step = as.numeric(tol_next),
-                                   posterior = as.matrix(cbind(tab_weight, simul_below_tol)))
-  }
   if (progress_bar) {
     print("step 1 completed")
   }
@@ -138,15 +127,11 @@
                                                       as.matrix(as.matrix(as.matrix(simul_below_tol)[, 1:nparam])),
                                                       tab_weight/sum(tab_weight), prior))
     }
-    if (verbose == TRUE) {
-      write.table(as.matrix(cbind(tab_weight2, tab_ini)),
-                  file = paste("model_step", it, sep = ""), row.names = F, col.names = F, quote = F)
-    }
     simul_below_tol2 = rbind(as.matrix(simul_below_tol), as.matrix(tab_ini))
     tab_weight = c(tab_weight, tab_weight2)
     tab_dist2 = .compute_dist(summary_stat_target,
                               as.matrix(as.matrix(tab_ini)[, (nparam + 1):(nparam + nstat)]),
-                              sd_simul, dist_weights=dist_weights)
+                              sd_simul, dist_weights = dist_weights)
     if (!is.null(dist_weights)) {
       tab_dist2 = tab_dist2 * (dist_weights/sum(dist_weights))
     }
@@ -168,40 +153,18 @@
       }
     }
     tab_dist = tab_dist_new[1:n_alpha]
-    if (verbose == TRUE) {
-      write.table(as.matrix(cbind(tab_weight, simul_below_tol)),
-                  file = paste("output_step", it, sep = ""), row.names = F, col.names = F, quote = F)
-      write.table(as.numeric(seed_count - seed_count_ini),
-                  file = paste("n_simul_tot_step", it, sep = ""), row.names = F, col.names = F, quote = F)
-      write.table(as.numeric(p_acc), file = paste("p_acc_step", it, sep = ""),
-                  row.names = F, col.names = F, quote = F)
-      write.table(as.numeric(tol_next),
-                  file = paste("tolerance_step", it, sep = ""), row.names = F, col.names = F, quote = F)
-      intermediary_steps[[it]] = list(n_simul_tot = as.numeric(seed_count - seed_count_ini),
-                                      tol_step = as.numeric(tol_next), p_acc = as.numeric(p_acc),
-                                      posterior = as.matrix(cbind(tab_weight, simul_below_tol)))
-    }
     if (progress_bar) {
-      print(paste("step ", it, " completed - p_acc = ", p_acc, sep = ""))
+      print(paste("Step ", it, " Completed: p_acc = ", p_acc, sep = ""))
     }
   }
   final_res = NULL
-  if (verbose == TRUE) {
-    final_res = list(param = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
-                     stats = as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
-                     weights = tab_weight/sum(tab_weight), stats_normalization = as.numeric(sd_simul),
-                     epsilon = max(.compute_dist(summary_stat_target,
-                                                 as.matrix(as.matrix(simul_below_tol)[,(nparam + 1):(nparam + nstat)]),
-                                                 sd_simul, dist_weights=dist_weights)), nsim = (seed_count - seed_count_ini),
-                     computime = as.numeric(difftime(Sys.time(), start, units = "secs")), intermediary = intermediary_steps)
-  } else {
-    final_res = list(param = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
-                     stats = as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
-                     weights = tab_weight/sum(tab_weight), stats_normalization = as.numeric(sd_simul),
-                     epsilon = max(.compute_dist(summary_stat_target, as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
-                                                 sd_simul, dist_weights=dist_weights)),
-                     nsim = (seed_count - seed_count_ini), computime = as.numeric(difftime(Sys.time(), start, units = "secs")))
-  }
+  final_res = list(param = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
+                   stats = as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
+                   weights = tab_weight/sum(tab_weight), stats_normalization = as.numeric(sd_simul),
+                   epsilon = max(.compute_dist(summary_stat_target, as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
+                                               sd_simul, dist_weights = dist_weights)),
+                   nsim = (seed_count - seed_count_ini), computime = as.numeric(difftime(Sys.time(), start, units = "secs")))
+
   final_res
 }
 
@@ -213,8 +176,7 @@
   tab_simul_summarystat = NULL
   tab_param = NULL
   list_param = list(NULL)
-  npar = floor(nb_simul/(100 * n_cluster))
-  n_end = nb_simul - (npar * 100 * n_cluster)
+  # n_end = nb_simul
   nparam = length(prior)
   l = length(prior)
   random_tab = NULL
@@ -222,53 +184,29 @@
   if (all_unif_prior) {
     random_tab = randomLHS(nb_simul, nparam)
   }
-  if (npar > 0) {
-    for (irun in 1:npar) {
-      for (i in 1:(100 * n_cluster)) {
-        param = array(0, l)
-        if (!all_unif_prior) {
-          param = .sample_prior(prior, prior_test)
-        } else {
-          for (j in 1:l) {
-            param[j] = as.numeric(prior[[j]]$sampleArgs[2]) +
-              (as.numeric(prior[[j]]$sampleArgs[3]) - as.numeric(prior[[j]]$sampleArgs[2])) *
-              random_tab[((irun - 1) * 100 * n_cluster + i), j]
-          }
-        }
-        param = c((seed_count + i), param)
-        list_param[[i]] = param
-        tab_param = rbind(tab_param, param[2:(l + 1)])
-      }
-      seed_count = seed_count + (n_cluster * 100)
-      list_simul_summarystat = parLapplyLB(cl, list_param, model)
-      for (i in 1:(100 * n_cluster)) {
-        tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
+
+  list_param = list(NULL)
+  for (i in 1:nb_simul) {
+    param = array(0, l)
+    if (!all_unif_prior) {
+      param = .sample_prior(prior, prior_test)
+    } else {
+      for (j in 1:l) {
+        param[j] = as.numeric(prior[[j]]$sampleArgs[2]) +
+          (as.numeric(prior[[j]]$sampleArgs[3]) - as.numeric(prior[[j]]$sampleArgs[2])) *
+          random_tab[i, j]
       }
     }
+    param = c((seed_count + i), param)
+    list_param[[i]] = param
+    tab_param = rbind(tab_param, param[2:(l + 1)])
   }
-  if (n_end > 0) {
-    list_param = list(NULL)
-    for (i in 1:n_end) {
-      param = array(0, l)
-      if (!all_unif_prior) {
-        param = .sample_prior(prior, prior_test)
-      } else {
-        for (j in 1:l) {
-          param[j] = as.numeric(prior[[j]]$sampleArgs[2]) +
-            (as.numeric(prior[[j]]$sampleArgs[3]) - as.numeric(prior[[j]]$sampleArgs[2])) *
-            random_tab[(npar * 100 * n_cluster + i), j]
-        }
-      }
-      param = c((seed_count + i), param)
-      list_param[[i]] = param
-      tab_param = rbind(tab_param, param[2:(l + 1)])
-    }
-    seed_count = seed_count + n_end
-    list_simul_summarystat = parLapplyLB(cl, list_param, model)
-    for (i in 1:n_end) {
-      tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
-    }
+  seed_count = seed_count + nb_simul
+  list_simul_summarystat = parLapplyLB(cl, list_param, model)
+  for (i in 1:nb_simul) {
+    tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
   }
+
   options(scipen = 0)
   cbind(tab_param, tab_simul_summarystat)
 }
@@ -283,78 +221,40 @@
   tab_param = NULL
   k_acc = 0
   list_param = list(NULL)
-  npar = floor(nb_simul/(100 * n_cluster))
-  n_end = nb_simul - (npar * 100 * n_cluster)
-  if (npar > 0) {
-    for (irun in 1:npar) {
-      for (i in 1:(100 * n_cluster)) {
-        l = dim(param_previous_step)[2]
-        counter = 0
-        repeat {
-          counter = counter + 1
-          k_acc = k_acc + 1
-          # pick a particle
-          param_picked = .particle_pick(param_previous_step, tab_weight)
-          # move it
-          # only variable parameters are moved, computation of a WEIGHTED variance
-          param_moved = .move_particle(as.numeric(param_picked),
-                                       2*cov.wt(as.matrix(as.matrix(param_previous_step)),
-                                                as.vector(tab_weight))$cov)
-          if ((!inside_prior) || (.is_included(param_moved, prior)) || (counter >= max_pick)) {
-            break
-          }
-        }
-        if (counter == max_pick) {
-          stop("The proposal jumps outside of the prior distribution too often -
-                       consider using the option 'inside_prior=FALSE' or enlarging the prior distribution")
-        }
-        param = param_previous_step[1, ]
-        param = param_moved
-        param = c((seed_count + i), param)
-        list_param[[i]] = param
-        tab_param = rbind(tab_param, param[2:(l + 1)])
-      }
-      seed_count = seed_count + n_cluster * 100
-      list_simul_summarystat = parLapplyLB(cl, list_param, model)
-      for (i in 1:(100 * n_cluster)) {
-        tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
+
+  list_param = list(NULL)
+  for (i in 1:nb_simul) {
+    l = dim(param_previous_step)[2]
+    counter = 0
+    repeat {
+      k_acc = k_acc + 1
+      counter = counter + 1
+      # pick a particle
+      param_picked = .particle_pick(param_previous_step, tab_weight)
+      # move it
+      # only variable parameters are moved, computation of a WEIGHTED variance
+      param_moved = .move_particle(as.numeric(param_picked),
+                                   2 * cov.wt(as.matrix(as.matrix(param_previous_step)),
+                                              as.vector(tab_weight))$cov)
+      if ((!inside_prior) || (.is_included(param_moved, prior)) || (counter >= max_pick)) {
+        break
       }
     }
+    if (counter == max_pick) {
+      stop("The proposal jumps outside of the prior distribution too often -
+                   consider using the option 'inside_prior=FALSE' or enlarging the prior distribution")
+    }
+    param = param_previous_step[1, ]
+    param = param_moved
+    param = c((seed_count + i), param)
+    list_param[[i]] = param
+    tab_param = rbind(tab_param, param[2:(l + 1)])
   }
-  if (n_end > 0) {
-    list_param = list(NULL)
-    for (i in 1:n_end) {
-      l = dim(param_previous_step)[2]
-      counter = 0
-      repeat {
-        k_acc = k_acc + 1
-        counter = counter + 1
-        # pick a particle
-        param_picked = .particle_pick(param_previous_step, tab_weight)
-        # move it
-        # only variable parameters are moved, computation of a WEIGHTED variance
-        param_moved = .move_particle(as.numeric(param_picked),
-                                     2 * cov.wt(as.matrix(as.matrix(param_previous_step)),
-                                                as.vector(tab_weight))$cov)
-        if ((!inside_prior) || (.is_included(param_moved, prior)) || (counter >= max_pick)) {
-          break
-        }
-      }
-      if (counter == max_pick) {
-        stop("The proposal jumps outside of the prior distribution too often -
-                     consider using the option 'inside_prior=FALSE' or enlarging the prior distribution")
-      }
-      param = param_previous_step[1, ]
-      param = param_moved
-      param = c((seed_count + i), param)
-      list_param[[i]] = param
-      tab_param = rbind(tab_param, param[2:(l + 1)])
-    }
-    seed_count = seed_count + n_end
-    list_simul_summarystat = parLapplyLB(cl, list_param, model)
-    for (i in 1:n_end) {
-      tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
-    }
+  seed_count = seed_count + nb_simul
+  list_simul_summarystat = parLapplyLB(cl, list_param, model)
+  for (i in 1:nb_simul) {
+    tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
   }
+
   list(cbind(tab_param, tab_simul_summarystat), nb_simul/k_acc)
 }
