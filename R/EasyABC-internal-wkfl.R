@@ -269,7 +269,6 @@
       tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
     }
   }
-  browser()
   options(scipen = 0)
   cbind(tab_param, tab_simul_summarystat)
 }
