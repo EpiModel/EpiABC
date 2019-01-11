@@ -98,7 +98,7 @@
   tol_next = max(tab_dist)
   intermediary_steps = list(NULL)
   if (progress_bar) {
-    print("step 1 completed")
+    print("Step 1 Completed ...")
   }
 
   ## following steps
