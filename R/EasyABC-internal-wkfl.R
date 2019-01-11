@@ -235,7 +235,6 @@
               random_tab[((irun - 1) * 100 * n_cluster + i), j]
           }
         }
-        # if (use_seed) # NB: we force the value use_seed=TRUE
         param = c((seed_count + i), param)
         list_param[[i]] = param
         tab_param = rbind(tab_param, param[2:(l + 1)])
@@ -248,7 +247,6 @@
     }
   }
   if (n_end > 0) {
-    # stopCluster(cl) cl <- makeCluster(getOption('cl.cores', 1))
     list_param = list(NULL)
     for (i in 1:n_end) {
       param = array(0, l)
@@ -270,9 +268,6 @@
     for (i in 1:n_end) {
       tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
     }
-    # stopCluster(cl)
-  } else {
-    # stopCluster(cl)
   }
   browser()
   options(scipen = 0)
@@ -283,11 +278,11 @@
 ## function to perform ABC simulations from a non-uniform prior (derived from a
 ## set of particles)
 .ABC_launcher_not_uniformc_cluster <- function(model, prior, param_previous_step,
-                                               tab_weight, nb_simul, seed_count, inside_prior, n_cluster, cl, max_pick=10000) {
+                                               tab_weight, nb_simul, seed_count,
+                                               inside_prior, n_cluster, cl, max_pick=10000) {
   tab_simul_summarystat = NULL
   tab_param = NULL
   k_acc = 0
-  # cl <- makeCluster(getOption("cl.cores", n_cluster))
   list_param = list(NULL)
   npar = floor(nb_simul/(100 * n_cluster))
   n_end = nb_simul - (npar * 100 * n_cluster)
@@ -328,7 +323,6 @@
     }
   }
   if (n_end > 0) {
-    # stopCluster(cl) cl <- makeCluster(getOption('cl.cores', 1))
     list_param = list(NULL)
     for (i in 1:n_end) {
       l = dim(param_previous_step)[2]
@@ -363,6 +357,5 @@
       tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
     }
   }
-  # stopCluster(cl)
   list(cbind(tab_param, tab_simul_summarystat), nb_simul/k_acc)
 }
