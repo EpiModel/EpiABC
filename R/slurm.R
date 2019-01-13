@@ -124,7 +124,7 @@ abc_smc_wave <- function(input, wave, batch) {
     max_pick <- input$init$max_pick
     nstat <- input$init$nstat
     n_cluster <- input$init$n_cluster
-    nb_simul_step <- input$nb_simul_step <- nb_simul - n_alpha
+    nb_simul_step <- input$init$nb_simul_step <- nb_simul - n_alpha
 
     #prior wave
     simul_below_tol <- input$pwave$simul_below_tol
