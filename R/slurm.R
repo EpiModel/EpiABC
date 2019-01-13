@@ -105,11 +105,9 @@ abc_smc_wave <- function(input, wave, batch) {
                          nb_simul,
                          seed_count,
                          n_cluster)
-    out <- list(init = input, seed_count = seed_count, tab_ini = tab_ini)
-    # fn <- paste0("abc.wave0.batch", batch, ".rda")
-    # save(out, file = fn)
-    return(out)
 
+    out <- list(init = input, seed_count = seed_count, tab_ini = tab_ini)
+    return(out)
   }
 
 
@@ -133,8 +131,6 @@ abc_smc_wave <- function(input, wave, batch) {
     tab_weight <- input$pwave$tab_weight
     seed_count <- input$pwave$seed_count
 
-
-
     tab_inic <- abc_waveN(model = model,
                           prior = prior,
                           param_previous_step = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
@@ -146,10 +142,7 @@ abc_smc_wave <- function(input, wave, batch) {
                           max_pick = max_pick)
 
     out <- list(init = input$init, pwave = input$pwave, tab_inic = tab_inic)
-    # fn <- paste0("abc.wave", wave, ".batch", batch, ".rda")
-    # save(out, file = fn)
     return(out)
-
   }
 
 }
@@ -199,9 +192,6 @@ abc_smc_process <- function(input, wave) {
                 pwave = list(tab_weight = tab_weight, seed_count = seed_count,
                              simul_below_tol = simul_below_tol, tab_dist = tab_dist,
                              tol_next = tol_next, sd_simul = as.numeric(sd_simul)))
-
-    # fn <- paste0("abc.wave0.dist.rda")
-    # save(out, file = fn)
     return(out)
   }
 
@@ -279,9 +269,6 @@ abc_smc_process <- function(input, wave) {
                 pwave = list(tab_weight = tab_weight, seed_count = seed_count,
                              simul_below_tol = simul_below_tol, tab_dist = tab_dist,
                              tol_next = tol_next, sd_simul = sd_simul, p_acc = p_acc))
-
-    # fn <- paste0("abc.wave", wave, "dist.rda")
-    # save(out, file = fn)
     return(out)
   }
 
@@ -299,7 +286,6 @@ abc_smc_process <- function(input, wave) {
 }
 
 
-
 #' @export
 abc_wave0 <- function(model,
                       prior,
@@ -308,7 +294,6 @@ abc_wave0 <- function(model,
                       seed_count,
                       n_cluster) {
 
-  tab_simul_summarystat <- NULL
   tab_param <- NULL
   list_param <- list(NULL)
   nparam <- length(prior)
@@ -341,9 +326,7 @@ abc_wave0 <- function(model,
   list_simul_summarystat <- parLapplyLB(cl, list_param, model)
   stopCluster(cl)
 
-  for (i in 1:nb_simul) {
-    tab_simul_summarystat <- rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
-  }
+  tab_simul_summarystat <- do.call("rbind", list_simul_summarystat)
 
   options(scipen = 0)
 
@@ -362,7 +345,6 @@ abc_waveN <- function(model,
                       n_cluster,
                       max_pick = 10000) {
 
-  tab_simul_summarystat <- NULL
   tab_param <- NULL
   k_acc <- 0
   list_param <- list(NULL)
@@ -401,9 +383,7 @@ abc_waveN <- function(model,
   list_simul_summarystat = parLapplyLB(cl, list_param, model)
   stopCluster(cl)
 
-  for (i in 1:nb_simul) {
-    tab_simul_summarystat <- rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
-  }
+  tab_simul_summarystat <- do.call("rbind", list_simul_summarystat)
 
   out <- list(cbind(tab_param, tab_simul_summarystat), nb_simul/k_acc)
   return(out)
