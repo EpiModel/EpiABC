@@ -11,15 +11,15 @@ Maintainer: Samuel Jenness <samuel.m.jenness@emory.edu>
 License: GPL-3
 Depends: 
     R (>= 2.14.0),
-    abc,
-    snow
+    abc
 Imports: 
     pls,
     mnormt,
     MASS,
     parallel,
     lhs,
-    tensorA
+    tensorA,
+    snow
 Suggests:
     Rmpi
 LazyLoad: yes
