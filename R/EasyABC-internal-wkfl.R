@@ -105,14 +105,20 @@
   p_acc = p_acc_min + 1
   nb_simul_step = nb_simul - n_alpha
   it = 1
+
   while (p_acc > p_acc_min) {
     it = it + 1
     simul_below_tol2 = NULL
-    tab_inic = .ABC_launcher_not_uniformc_cluster(model, prior,
-                                                  as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
-                                                  tab_weight/sum(tab_weight), nb_simul_step,
-                                                  seed_count, inside_prior,
-                                                  n_cluster, cl, max_pick)
+    tab_inic = .ABC_launcher_not_uniformc_cluster(model = model,
+                                                  prior = prior,
+                                                  param_previous_step = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
+                                                  tab_weight = tab_weight/sum(tab_weight),
+                                                  nb_simul = nb_simul_step,
+                                                  seed_count = seed_count,
+                                                  inside_prior = inside_prior,
+                                                  n_cluster = n_cluster,
+                                                  cl = cl,
+                                                  max_pick = max_pick)
     tab_ini = as.matrix(tab_inic[[1]])
     tab_ini = as.numeric(tab_ini)
     dim(tab_ini) = c(nb_simul_step, (nparam + nstat))
@@ -137,8 +143,7 @@
     p_acc = length(tab_dist2[!is.na(tab_dist2) & tab_dist2 <= tol_next])/nb_simul_step
     tab_dist = c(tab_dist, tab_dist2)
     tol_next = sort(tab_dist)[n_alpha]
-    simul_below_tol2 = simul_below_tol2[!is.na(tab_dist) & tab_dist <= tol_next,
-                                        ]
+    simul_below_tol2 = simul_below_tol2[!is.na(tab_dist) & tab_dist <= tol_next, ]
     tab_weight = tab_weight[!is.na(tab_dist) & tab_dist <= tol_next]
     tab_weight = tab_weight[1:n_alpha]
     tab_dist = tab_dist[!is.na(tab_dist) & tab_dist <= tol_next]
@@ -202,7 +207,6 @@
     tab_param = rbind(tab_param, param[2:(l + 1)])
   }
   seed_count = seed_count + nb_simul
-  browser()
   list_simul_summarystat = parLapplyLB(cl, list_param, model)
   for (i in 1:nb_simul) {
     tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
