@@ -8,7 +8,7 @@ abc_smc_prep <- function(model,
                          n_cluster = 2,
                          dist_weights = NULL,
                          alpha = 0.5,
-                         p_acc_min = 0.45,
+                         p_acc_min = 0.1,
                          ...) {
 
   ## checking errors in the inputs
