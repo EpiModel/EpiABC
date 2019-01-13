@@ -1,20 +1,17 @@
 
 #' @export
-abc_smc_prep <- function(method,
-                          model,
-                          prior,
-                          nb_simul,
-                          summary_stat_target,
-                          prior_test = NULL,
-                          n_cluster = 2,
-                          dist_weights=NULL,
-                          alpha = 0.5,
-                          p_acc_min = 0.45,
-                          ...) {
+abc_smc_prep <- function(model,
+                         prior,
+                         nb_simul,
+                         summary_stat_target,
+                         prior_test = NULL,
+                         n_cluster = 2,
+                         dist_weights = NULL,
+                         alpha = 0.5,
+                         p_acc_min = 0.45,
+                         ...) {
 
   ## checking errors in the inputs
-  if (missing(method))
-    stop("'method' is missing")
   if (missing(model))
     stop("'model' is missing")
   if (missing(prior))
@@ -29,9 +26,6 @@ abc_smc_prep <- function(method,
     stop("'nb_simul' is missing")
   if (missing(summary_stat_target))
     stop("'summary_stat_target' is missing")
-  if (!any(method == c("Beaumont", "Drovandi", "Delmoral", "Lenormand", "Emulation"))) {
-    stop("Method must be Beaumont, Drovandi, Delmoral, Lenormand or Emulation")
-  }
   if (!is.vector(nb_simul))
     stop("'nb_simul' has to be a number.")
   if (length(nb_simul) > 1)
@@ -68,8 +62,10 @@ abc_smc_prep <- function(method,
   if (p_acc_min >= 1)
     stop("'p_acc_min' has to be between 0 and 1.")
 
-  out <- list(model, prior, prior_test, nb_simul, summary_stat_target,
-              n_cluster, dist_weights, alpha, p_acc_min)
+  out <- list(model = model, prior = prior, prior_test = prior_test,
+              nb_simul = nb_simul, summary_stat_target = summary_stat_target,
+              n_cluster = n_cluster, dist_weights = dist_weights,
+              alpha = alpha, p_acc_min = p_acc_min)
 
   return(out)
 }
