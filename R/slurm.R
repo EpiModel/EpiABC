@@ -126,13 +126,14 @@ abc_smc_wave <- function(input, wave, batch) {
     max_pick <- input$init$max_pick
     nstat <- input$init$nstat
     n_cluster <- input$init$n_cluster
+    nb_simul_step <- input$nb_simul_step <- nb_simul - n_alpha
 
     #prior wave
     simul_below_tol <- input$pwave$simul_below_tol
     tab_weight <- input$pwave$tab_weight
     seed_count <- input$pwave$seed_count
 
-    nb_simul_step <- nb_simul - n_alpha
+
 
     tab_inic <- abc_waveN(model = model,
                           prior = prior,
@@ -216,6 +217,7 @@ abc_smc_process <- function(input, wave) {
     summary_stat_target <- input$init$summary_stat_target
     dist_weights <- input$init$dist_weights
     inside_prior <- input$init$inside_prior
+    nb_simul_step <- input$init$nb_simul_step
 
     # prior wave
     seed_count <- input$pwave$seed_count
@@ -227,8 +229,6 @@ abc_smc_process <- function(input, wave) {
 
     # current wave simulation
     tab_inic <- input$tab_inic
-
-    nb_simul_step <- nb_simul - n_alpha
 
     if (wave == 1) {
       p_acc <- p_acc_min + 1
