@@ -28,3 +28,12 @@ for (i in 1:20) {
   cat("\n", wavedist$pwave$p_acc)
   wave <- wave + 1
 }
+
+## TODO:
+## batch size = n_cluster
+## need fx to query sim range from batch number
+## split work only in abc_wave0 and abc_waveN to sim range
+## abc_smc_merge fx to combine output from abc_smc_wave, following same order
+## abc_smc_process runs on merged data
+## master sim script does smart file names based on batch
+## helper function to write sbatch scripts?
