@@ -105,9 +105,10 @@ abc_smc_wave <- function(input, wave, batch) {
                          nb_simul,
                          seed_count,
                          n_cluster)
-    out <- list(init = input, seed_count, tab_ini)
-    fn <- paste0("abc.wave0.batch", batch, ".rda")
-    save(out, file = fn)
+    out <- list(init = input, seed_count = seed_count, tab_ini = tab_ini)
+    # fn <- paste0("abc.wave0.batch", batch, ".rda")
+    # save(out, file = fn)
+    return(out)
 
   }
 
@@ -143,9 +144,10 @@ abc_smc_wave <- function(input, wave, batch) {
                           n_cluster = n_cluster,
                           max_pick = max_pick)
 
-    out <- list(init = input$init, pwave = input$pwave, tab_inic)
-    fn <- paste0("abc.wave", wave, ".batch", batch, ".rda")
-    save(out, file = fn)
+    out <- list(init = input$init, pwave = input$pwave, tab_inic = tab_inic)
+    # fn <- paste0("abc.wave", wave, ".batch", batch, ".rda")
+    # save(out, file = fn)
+    return(out)
 
   }
 
@@ -160,6 +162,7 @@ abc_smc_process <- function(input, wave) {
     n_alpha <- input$init$n_alpha
     nparam <- input$init$nparam
     nstat <- input$init$nstat
+    nb_simul <- input$init$nb_simul
     summary_stat_target <- input$init$summary_stat_target
     alpha <- input$init$alpha
     dist_weights <- input$init$dist_weights
@@ -192,10 +195,13 @@ abc_smc_process <- function(input, wave) {
     tol_next <- max(tab_dist)
 
     out <- list(init = input$init,
-                pwave = list(tab_weight, seed_count, simul_below_tol, tab_dist, tol_next, sd_simul))
+                pwave = list(tab_weight = tab_weight, seed_count = seed_count,
+                             simul_below_tol = simul_below_tol, tab_dist = tab_dist,
+                             tol_next = tol_next, sd_simul = as.numeric(sd_simul)))
 
-    fn <- paste0("abc.wave0.dist.rda")
-    save(out, file = fn)
+    # fn <- paste0("abc.wave0.dist.rda")
+    # save(out, file = fn)
+    return(out)
   }
 
   if (wave > 0) {
@@ -206,6 +212,7 @@ abc_smc_process <- function(input, wave) {
     n_alpha <- input$init$n_alpha
     nparam <- input$init$nparam
     nstat <- input$init$nstat
+    nb_simul <- input$init$nb_simul
     summary_stat_target <- input$init$summary_stat_target
     dist_weights <- input$init$dist_weights
     inside_prior <- input$init$inside_prior
@@ -269,10 +276,13 @@ abc_smc_process <- function(input, wave) {
     tab_dist <- tab_dist_new[1:n_alpha]
 
     out <- list(init = input$init,
-                pwave = list(tab_weight, seed_count, simul_below_tol, tab_dist, tol_next, sd_simul, p_acc))
+                pwave = list(tab_weight = tab_weight, seed_count = seed_count,
+                             simul_below_tol = simul_below_tol, tab_dist = tab_dist,
+                             tol_next = tol_next, sd_simul = sd_simul, p_acc = p_acc))
 
-    fn <- paste0("abc.wave", wave, "dist.rda")
-    save(out, file = fn)
+    # fn <- paste0("abc.wave", wave, "dist.rda")
+    # save(out, file = fn)
+    return(out)
   }
 
   if (wave == Inf) {
