@@ -388,3 +388,7 @@ abc_waveN <- function(model,
   out <- list(cbind(tab_param, tab_simul_summarystat), nb_simul/k_acc)
   return(out)
 }
+
+batch_to_sims <- function(batchSize, batchNum) {
+  ((batchSize*batchNum) - (batchSize - 1)):(batchSize*batchNum)
+}
