@@ -73,7 +73,7 @@ abc_smc_prep <- function(model,
 
 
 #' @export
-abc_smc_wave <- function(input, wave, batch) {
+abc_smc_wave <- function(input, wave, batch, save = FALSE, outdir = "") {
 
   if (wave == 0) {
 
@@ -84,20 +84,19 @@ abc_smc_wave <- function(input, wave, batch) {
     nb_simul <- input$nb_simul
     summary_stat_target <- input$summary_stat_target
     n_cluster <- input$n_cluster
-    # dist_weights <- input$dist_weights
     alpha <- input$alpha
-    p_acc_min <- input$p_acc_min
 
     seed_count <- 0
-    inside_prior <- input$inside_prior <- TRUE
-    max_pick <- input$max_pick <- 10000
+    input$inside_prior <- TRUE
+    input$max_pick <- 10000
 
-    nparam <- input$nparam <- length(prior)
-    nstat <- input$nstat <- length(summary_stat_target)
+    input$nparam <- length(prior)
+    input$nstat <- length(summary_stat_target)
     if (!.all_unif(prior)) {
       stop("Prior distributions must be uniform")
     }
     n_alpha <- input$n_alpha <- ceiling(nb_simul * alpha)
+    input$nb_simul_step <- nb_simul - n_alpha
 
     tab_ini <- abc_wave0(model,
                          prior,
@@ -108,60 +107,48 @@ abc_smc_wave <- function(input, wave, batch) {
                          batch = batch)
 
     out <- list(init = input, seed_count = seed_count, tab_ini = tab_ini)
-    return(out)
-  }
 
+    if (save == TRUE) {
+      saveRDS(out, file = paste0(outdir, "abc.wave0.batch", stringr::str_pad(batch, 4, pad = "0"), ".rda"))
+    } else {
+      return(out)
+    }
+  }
 
   if (wave > 0) {
-
-    # fixed
-    p_acc_min <- input$init$p_acc_min
-    n_alpha <- input$init$n_alpha
-    nb_simul <- input$init$nb_simul
-    model <- input$init$model
-    prior <- input$init$prior
-    nparam <- input$init$nparam
-    inside_prior <- input$init$inside_prior
-    max_pick <- input$init$max_pick
-    nstat <- input$init$nstat
-    n_cluster <- input$init$n_cluster
-    nb_simul_step <- input$init$nb_simul_step <- nb_simul - n_alpha
-
-    #prior wave
-    simul_below_tol <- input$pwave$simul_below_tol
-    tab_weight <- input$pwave$tab_weight
-    seed_count <- input$pwave$seed_count
-
-    tab_inic <- abc_waveN(model = model,
-                          prior = prior,
-                          param_previous_step = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
-                          tab_weight = tab_weight/sum(tab_weight),
-                          nb_simul = nb_simul_step,
-                          seed_count = seed_count,
-                          inside_prior = inside_prior,
-                          n_cluster = n_cluster,
-                          max_pick = max_pick,
-                          batch = batch)
-
+    tab_inic <- abc_waveN(input = input, batch = batch)
     out <- list(init = input$init, pwave = input$pwave, tab_inic = tab_inic)
-    return(out)
+    if (save == TRUE) {
+      saveRDS(wavedat, file = paste0(outdir, "abc.wave", wave, ".batch", stringr::str_pad(batch, 4, pad = "0"), ".rda"))
+    } else {
+      return(out)
+    }
   }
-
 }
 
 #' @export
-abc_smc_process <- function(input, wave) {
+abc_smc_process <- function(input, wave, save = FALSE, outdir = "") {
+
+  if (class(input) == "character") {
+    file <- list.files(input, pattern = paste0("wave", wave, ".rda"), full.names = TRUE)
+    input <- readRDS(file)
+  }
 
   if (wave == 0) {
 
     # fixed
+    prior <- input$init$prior
     n_alpha <- input$init$n_alpha
     nparam <- input$init$nparam
     nstat <- input$init$nstat
     nb_simul <- input$init$nb_simul
+    nb_simul_step <- input$init$nb_simul_step
     summary_stat_target <- input$init$summary_stat_target
     alpha <- input$init$alpha
     dist_weights <- input$init$dist_weights
+    inside_prior <- input$init$inside_prior
+    max_pick <- input$init$max_pick
+
 
     # current wave simulation
     seed_count <- input$seed_count
@@ -190,11 +177,57 @@ abc_smc_process <- function(input, wave) {
     }
     tol_next <- max(tab_dist)
 
+
+    # particle selection for wave 1 -------------------------------------------
+
+    param_previous_step <- as.matrix(as.matrix(simul_below_tol)[, 1:nparam])
+    tab_weight <- tab_weight/sum(tab_weight)
+
+    tab_param <- NULL
+    k_acc <- 0
+    list_param <- list(NULL)
+
+    list_param <- list(NULL)
+    for (i in 1:nb_simul_step) {
+      l <- dim(param_previous_step)[2]
+      counter <- 0
+      repeat {
+        k_acc <- k_acc + 1
+        counter <- counter + 1
+        # pick a particle
+        param_picked <- .particle_pick(param_previous_step, tab_weight)
+        # move it
+        # only variable parameters are moved, computation of a WEIGHTED variance
+        param_moved <- .move_particle(as.numeric(param_picked),
+                                      2 * cov.wt(as.matrix(as.matrix(param_previous_step)),
+                                                 as.vector(tab_weight))$cov)
+        if ((!inside_prior) || (.is_included(param_moved, prior)) || (counter >= max_pick)) {
+          break
+        }
+      }
+      if (counter == max_pick) {
+        stop("The proposal jumps outside of the prior distribution too often -
+                   consider using the option 'inside_prior=FALSE' or enlarging the prior distribution")
+      }
+      param <- param_previous_step[1, ]
+      param <- param_moved
+      param <- c((seed_count + i), param)
+      list_param[[i]] <- param
+      tab_param <- rbind(tab_param, param[2:(l + 1)])
+    }
+    seed_count <- seed_count + nb_simul_step
+
     out <- list(init = input$init,
                 pwave = list(tab_weight = tab_weight, seed_count = seed_count,
                              simul_below_tol = simul_below_tol, tab_dist = tab_dist,
-                             tol_next = tol_next, sd_simul = as.numeric(sd_simul)))
-    return(out)
+                             tol_next = tol_next, sd_simul = as.numeric(sd_simul)),
+                cwave = list(list_param = list_param, tab_param = tab_param, k_acc = k_acc))
+
+    if (save == TRUE) {
+      saveRDS(out, file = paste0(outdir, "abc.wave", wave, ".process", ".rda"))
+    } else {
+      return(out)
+    }
   }
 
   if (wave > 0) {
@@ -210,6 +243,7 @@ abc_smc_process <- function(input, wave) {
     dist_weights <- input$init$dist_weights
     inside_prior <- input$init$inside_prior
     nb_simul_step <- input$init$nb_simul_step
+    max_pick <- input$init$max_pick
 
     # prior wave
     seed_count <- input$pwave$seed_count
@@ -267,11 +301,57 @@ abc_smc_process <- function(input, wave) {
     }
     tab_dist <- tab_dist_new[1:n_alpha]
 
+
+    # particle selection for wave N+1 -------------------------------------------
+
+    param_previous_step = as.matrix(as.matrix(simul_below_tol)[, 1:nparam])
+    tab_weight = tab_weight/sum(tab_weight)
+
+    tab_param <- NULL
+    k_acc <- 0
+    list_param <- list(NULL)
+
+    list_param <- list(NULL)
+    for (i in 1:nb_simul_step) {
+      l <- dim(param_previous_step)[2]
+      counter <- 0
+      repeat {
+        k_acc <- k_acc + 1
+        counter <- counter + 1
+        # pick a particle
+        param_picked <- .particle_pick(param_previous_step, tab_weight)
+        # move it
+        # only variable parameters are moved, computation of a WEIGHTED variance
+        param_moved <- .move_particle(as.numeric(param_picked),
+                                      2 * cov.wt(as.matrix(as.matrix(param_previous_step)),
+                                                 as.vector(tab_weight))$cov)
+        if ((!inside_prior) || (.is_included(param_moved, prior)) || (counter >= max_pick)) {
+          break
+        }
+      }
+      if (counter == max_pick) {
+        stop("The proposal jumps outside of the prior distribution too often -
+                   consider using the option 'inside_prior=FALSE' or enlarging the prior distribution")
+      }
+      param <- param_previous_step[1, ]
+      param <- param_moved
+      param <- c((seed_count + i), param)
+      list_param[[i]] <- param
+      tab_param <- rbind(tab_param, param[2:(l + 1)])
+    }
+    seed_count <- seed_count + nb_simul_step
+
     out <- list(init = input$init,
                 pwave = list(tab_weight = tab_weight, seed_count = seed_count,
                              simul_below_tol = simul_below_tol, tab_dist = tab_dist,
-                             tol_next = tol_next, sd_simul = sd_simul, p_acc = p_acc))
-    return(out)
+                             tol_next = tol_next, sd_simul = sd_simul, p_acc = p_acc),
+                cwave = list(list_param = list_param, tab_param = tab_param, k_acc = k_acc))
+
+    if (save == TRUE) {
+      saveRDS(out, file = paste0(outdir, "abc.wave", wave, ".process", ".rda"))
+    } else {
+      return(out)
+    }
   }
 
   if (wave == Inf) {
@@ -326,7 +406,7 @@ abc_wave0 <- function(model,
   seed_count <- seed_count + nb_simul
 
   if (!is.null(batch)) {
-    simset <- batch_to_sims(n_cluster, batch)
+    simset <- batch_to_sims(n_cluster, batch, nb_simul)
     list_param <- list_param[simset]
     tab_param <- tab_param[simset, , drop = FALSE]
   }
@@ -344,54 +424,22 @@ abc_wave0 <- function(model,
 }
 
 #' @export
-abc_waveN <- function(model,
-                      prior,
-                      param_previous_step,
-                      tab_weight,
-                      nb_simul,
-                      seed_count,
-                      inside_prior,
-                      n_cluster,
-                      max_pick = 10000,
-                      batch) {
+abc_waveN <- function(input, batch) {
 
-  tab_param <- NULL
-  k_acc <- 0
-  list_param <- list(NULL)
+  # Fixed
+  model <- input$init$model
+  nb_simul <- input$init$nb_simul_step
+  n_cluster <- input$init$n_cluster
 
-  list_param <- list(NULL)
-  for (i in 1:nb_simul) {
-    l <- dim(param_previous_step)[2]
-    counter <- 0
-    repeat {
-      k_acc <- k_acc + 1
-      counter <- counter + 1
-      # pick a particle
-      param_picked <- .particle_pick(param_previous_step, tab_weight)
-      # move it
-      # only variable parameters are moved, computation of a WEIGHTED variance
-      param_moved <- .move_particle(as.numeric(param_picked),
-                                   2 * cov.wt(as.matrix(as.matrix(param_previous_step)),
-                                              as.vector(tab_weight))$cov)
-      if ((!inside_prior) || (.is_included(param_moved, prior)) || (counter >= max_pick)) {
-        break
-      }
-    }
-    if (counter == max_pick) {
-      stop("The proposal jumps outside of the prior distribution too often -
-                   consider using the option 'inside_prior=FALSE' or enlarging the prior distribution")
-    }
-    param <- param_previous_step[1, ]
-    param <- param_moved
-    param <- c((seed_count + i), param)
-    list_param[[i]] <- param
-    tab_param <- rbind(tab_param, param[2:(l + 1)])
-  }
-  seed_count <- seed_count + nb_simul
+  # Current wave
+  list_param <- input$cwave$list_param
+  tab_param <- input$cwave$tab_param
+  k_acc <- input$cwave$k_acc
 
   if (!is.null(batch)) {
-    simset <- batch_to_sims(n_cluster, batch)
+    simset <- batch_to_sims(n_cluster, batch, nb_simul)
     list_param <- list_param[simset]
+    tab_param <- tab_param[simset, , drop = FALSE]
   }
 
   cl <- makeCluster(n_cluster)
@@ -401,9 +449,42 @@ abc_waveN <- function(model,
   tab_simul_summarystat <- do.call("rbind", list_simul_summarystat)
 
   out <- list(cbind(tab_param, tab_simul_summarystat), nb_simul/k_acc)
+
   return(out)
 }
 
-batch_to_sims <- function(batchSize, batchNum) {
-  ((batchSize*batchNum) - (batchSize - 1)):(batchSize*batchNum)
+batch_to_sims <- function(batchSize, batchNum, totSims) {
+  ((batchSize*batchNum) - (batchSize - 1)):(min(batchSize*batchNum, totSims))
+}
+
+#' @export
+merge_abc <- function(wave, indir = "", outdir = "") {
+
+  files <- list.files(indir, pattern = paste0("wave", wave, ".batch"), full.names = TRUE)
+
+  if (wave == 0) {
+    for (i in 1:length(files)) {
+      if (i == 1) {
+        dat <- readRDS(files[i])
+      } else {
+        temp.dat <- readRDS(files[i])
+        dat$tab_ini <- rbind(dat$tab_ini, temp.dat$tab_ini)
+      }
+    }
+  }
+
+  if (wave > 0) {
+    for (i in 1:length(files)) {
+      if (i == 1) {
+        dat <- readRDS(files[i])
+      } else {
+        temp.dat <- readRDS(files[i])
+        dat$tab_inic[[1]] <- rbind(dat$tab_inic[[1]], temp.dat$tab_inic[[1]])
+      }
+    }
+  }
+
+  saveRDS(dat, file = paste0(outdir, "abc.wave", wave, ".rda"))
+  unlink(files)
+
 }
