@@ -1,20 +1,25 @@
 
-#' EpiABC: performing efficient approximate Bayesian computation sampling
-#' schemes using R
+#' EpiABC: Approximate Bayesian Computation for EpiModel on High-Performance Computing Clusters
 #'
-#' Description
+#' Implementation of Approximate Bayesian Computation with Sequential
+#' Monte Carlo Methods (ABC-SMC) optimized for use with EpiModel R package epidemic
+#' simulations running on High-Performance Computing (HPC) cluster environments such
+#' as MPI and Slurm.
 #'
-#' \tabular{ll}{ Package: EpiABC Type: Package Version: 1.5 Date: 2015-06-30
-#' License: GPL-3 LazyLoad: yes }
+#' \tabular{ll}{
+#'    Package: \tab EpiABC\cr
+#'    Type: \tab Package\cr
+#'    Version: \tab 1.0.0\cr
+#'    Date: \tab 2019-01-14\cr
+#'    License: \tab GPL-3\cr
+#'    LazyLoad: \tab yes\cr
+#' }
 #'
 #' @name EpiABC-package
 #' @aliases EpiABC-package EpiABC
 #' @docType package
-#' @author Franck Jabot, Thierry Faure, Nicolas Dumoulin, Carlo Albert
-#' @seealso \code{\link{ABC_rejection}}, \code{\link{ABC_sequential}},
-#' \code{\link{ABC_mcmc}}, \code{\link{SABC}}, \code{\link{binary_model}},
-#' \code{\link{binary_model_cluster}}
-#' @keywords package abc
+#'
+#' @keywords package
 #'
 #' @import MASS mnormt parallel pls abc lhs tensorA
 #' @importFrom stats as.formula cov cov.wt lm optimize rnorm runif sd uniroot var
