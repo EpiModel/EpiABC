@@ -1,6 +1,6 @@
 
 library("methods")
-library("EasyABCMPI")
+library("EpiABC")
 
 toy_model_parallel <- function(x){
   set.seed(x[1])
@@ -29,11 +29,37 @@ for (i in 1:20) {
   wave <- wave + 1
 }
 
+
+prep <- abc_smc_prep(model = toy_model_parallel,
+                     prior = toy_prior,
+                     nb_simul = 100,
+                     summary_stat_target = sum_stat_obs,
+                     n_cluster = 4,
+                     alpha = 0.2,
+                     p_acc_min = 0.1)
+prep
+
+# wave0:
+nBatches <- prep$nb_simul/prep$n_cluster
+
+for (batch in 1:nBatches) {
+  wavedat <- abc_smc_wave(input = prep, wave = 0, batch = batch)
+  save(wavedat, file = paste0("dat/abc.wave0.batch", batch, ".rda"))
+  cat("\n Batch:", batch)
+}
+
+
+
+wavedist <- abc_smc_process(input = wavedat, wave = wave)
+
+
+
 ## TODO:
-## batch size = n_cluster
-## need fx to query sim range from batch number
+## batch size = n_cluster # done
+## need fx to query sim range from batch number # done
 ## split work only in abc_wave0 and abc_waveN to sim range
 ## abc_smc_merge fx to combine output from abc_smc_wave, following same order
 ## abc_smc_process runs on merged data
 ## master sim script does smart file names based on batch
 ## helper function to write sbatch scripts?
+## figure out what to do with no aligned batches

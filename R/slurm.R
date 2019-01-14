@@ -104,7 +104,8 @@ abc_smc_wave <- function(input, wave, batch) {
                          prior_test,
                          nb_simul,
                          seed_count,
-                         n_cluster)
+                         n_cluster,
+                         batch = batch)
 
     out <- list(init = input, seed_count = seed_count, tab_ini = tab_ini)
     return(out)
@@ -139,7 +140,8 @@ abc_smc_wave <- function(input, wave, batch) {
                           seed_count = seed_count,
                           inside_prior = inside_prior,
                           n_cluster = n_cluster,
-                          max_pick = max_pick)
+                          max_pick = max_pick,
+                          batch = batch)
 
     out <- list(init = input$init, pwave = input$pwave, tab_inic = tab_inic)
     return(out)
@@ -292,7 +294,8 @@ abc_wave0 <- function(model,
                       prior_test,
                       nb_simul,
                       seed_count,
-                      n_cluster) {
+                      n_cluster,
+                      batch) {
 
   tab_param <- NULL
   list_param <- list(NULL)
@@ -322,6 +325,12 @@ abc_wave0 <- function(model,
   }
   seed_count <- seed_count + nb_simul
 
+  if (!is.null(batch)) {
+    simset <- batch_to_sims(n_cluster, batch)
+    list_param <- list_param[simset]
+    tab_param <- tab_param[simset, , drop = FALSE]
+  }
+
   cl <- makeCluster(n_cluster)
   list_simul_summarystat <- parLapplyLB(cl, list_param, model)
   stopCluster(cl)
@@ -343,7 +352,8 @@ abc_waveN <- function(model,
                       seed_count,
                       inside_prior,
                       n_cluster,
-                      max_pick = 10000) {
+                      max_pick = 10000,
+                      batch) {
 
   tab_param <- NULL
   k_acc <- 0
@@ -378,6 +388,11 @@ abc_waveN <- function(model,
     tab_param <- rbind(tab_param, param[2:(l + 1)])
   }
   seed_count <- seed_count + nb_simul
+
+  if (!is.null(batch)) {
+    simset <- batch_to_sims(n_cluster, batch)
+    list_param <- list_param[simset]
+  }
 
   cl <- makeCluster(n_cluster)
   list_simul_summarystat = parLapplyLB(cl, list_param, model)
