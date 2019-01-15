@@ -6,9 +6,7 @@ suppressMessages(library("EpiModel"))
 prep <- readRDS("data/abc.prep.rda")
 
 batch <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
-print(batch)
 wave <- as.numeric(Sys.getenv("wave"))
-print(wave)
 
 # Wave 0
 if (wave == 0) {
