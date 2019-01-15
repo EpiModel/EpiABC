@@ -1,7 +1,7 @@
 
 
 library("methods")
-suppressMessages(library("EasyABCMPI"))
+suppressMessages(library("EpiABC"))
 suppressMessages(library("EpiModel"))
 
 n <- 1000
