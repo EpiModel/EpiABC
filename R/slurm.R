@@ -404,9 +404,9 @@ summary_abc <- function(input) {
   cat("\np_acc:", input$p_acc)
 
   paramSumm <- apply(input$param, 2, summary)
-  colnames(paramSumm) <- ""
+  colnames(paramSumm) <- rep("", ncol(paramSumm))
   statsSumm <- apply(input$stats, 2, summary)
-  colnames(statsSumm) <- ""
+  colnames(statsSumm) <- rep("", ncol(statsSumm))
 
   cat("\n\nTarget Stats: \n", input$target)
   cat("\nSimulated Targets")
