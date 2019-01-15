@@ -12,9 +12,9 @@ print(wave)
 
 # Wave 0
 if (wave == 0) {
-  abc_smc_wave(input = prep, wave = 0, batch = batch)
+  abc_smc_wave(input = prep, wave = wave, batch = batch)
 } else {
-  abc_smc_wave(wave = 1, batch = batch)
+  abc_smc_wave(wave = wave, batch = batch)
 }
 
 merge_abc(wave = wave)
