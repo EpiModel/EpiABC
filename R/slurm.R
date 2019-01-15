@@ -136,7 +136,7 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
 
   if (class(input) == "character") {
     file <- list.files(input, pattern = paste0("wave", wave, ".rda"), full.names = TRUE)
-    if (length(file) == 0) stop()
+    if (length(file) == 0) return(NULL)
     input <- readRDS(file)
   }
 
@@ -368,7 +368,7 @@ out_abc <- function(wave, input = "data/") {
 
   if (class(input) == "character") {
     file <- list.files(input, pattern = paste0("wave", wave, ".rda"), full.names = TRUE)
-    if (length(file) == 0) stop()
+    if (length(file) == 0) return(NULL)
     input <- readRDS(file)
   }
 
@@ -519,7 +519,7 @@ merge_abc <- function(wave, indir = "data/", outdir = "data/") {
       if (i == 1) {
         dat <- readRDS(files[i])
         nBatches <- ceiling(dat$init$nb_simul/dat$init$n_cluster)
-        if (length(files) < nBatches) stop()
+        if (length(files) < nBatches) return(NULL)
       } else {
         temp.dat <- readRDS(files[i])
         dat$tab_ini <- rbind(dat$tab_ini, temp.dat$tab_ini)
@@ -532,7 +532,7 @@ merge_abc <- function(wave, indir = "data/", outdir = "data/") {
       if (i == 1) {
         dat <- readRDS(files[i])
         nBatches <- ceiling((dat$init$nb_simul - ceiling(dat$init$nb_simul * dat$init$alpha))/dat$init$n_cluster)
-        if (length(files) < nBatches) stop()
+        if (length(files) < nBatches) return(NULL)
       } else {
         temp.dat <- readRDS(files[i])
         dat$tab_inic[[1]] <- rbind(dat$tab_inic[[1]], temp.dat$tab_inic[[1]])
