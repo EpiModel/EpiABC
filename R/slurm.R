@@ -531,7 +531,7 @@ merge_abc <- function(wave, indir = "data/", outdir = "data/") {
     for (i in 1:length(files)) {
       if (i == 1) {
         dat <- readRDS(files[i])
-        nBatches <- ceiling(dat$init$alpha*dat$init$nb_simul/dat$init$n_cluster)
+        nBatches <- ceiling((dat$init$nb_simul - ceiling(dat$init$nb_simul * dat$init$alpha))/dat$init$n_cluster)
         if (length(files) < nBatches) stop()
       } else {
         temp.dat <- readRDS(files[i])
