@@ -51,38 +51,35 @@ prep
 nBatches <- ceiling(prep$nb_simul/prep$n_cluster)
 nBatches
 
-# run in batch model
+# Wave 0
 for (batch in 1:nBatches) {
   abc_smc_wave(input = prep, wave = 0, batch = batch)
   cat("\n Batch:", batch)
 }
-
-# interactive, or could run in batch mode by looking up file size done
 merge_abc(wave = 0)
 abc_smc_process(wave = 0)
 
-# write a new batch script
+# Wave 1
 nBatches <- ceiling(prep$alpha*prep$nb_simul/prep$n_cluster)
 
-# run in batch mode
 for (batch in 1:nBatches) {
   abc_smc_wave(wave = 1, batch = batch)
   cat("\n Batch:", batch)
 }
-
-# interactive
 merge_abc(wave = 1)
 abc_smc_process(wave = 1)
 
-# run in batch mode
+# Wave 2
 for (batch in 1:nBatches) {
   abc_smc_wave(wave = 2, batch = batch)
   cat("\n Batch:", batch)
 }
-
-# interactive
 merge_abc(wave = 2)
 abc_smc_process(wave = 2)
+
+w2 <- out_abc(wave = 2)
+summary_abc(w2)
+
 
 
 ## TODO:

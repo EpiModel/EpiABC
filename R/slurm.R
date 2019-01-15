@@ -359,16 +359,62 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
     }
   }
 
-  if (wave == Inf) {
-    final_res <- list(param = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
-                     stats = as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
-                     weights = tab_weight/sum(tab_weight), stats_normalization = as.numeric(sd_simul),
-                     epsilon = max(.compute_dist(summary_stat_target,
-                                                 as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
-                                                 sd_simul, dist_weights = dist_weights)))
+}
 
-    return(final_res)
+
+#' @export
+out_abc <- function(wave, input = "data/") {
+
+  if (class(input) == "character") {
+    file <- list.files(input, pattern = paste0("wave", wave, ".rda"), full.names = TRUE)
+    if (length(file) == 0) stop()
+    input <- readRDS(file)
   }
+
+  # fixed
+  nparam <- input$init$nparam
+  nstat <- input$init$nstat
+  summary_stat_target <- input$init$summary_stat_target
+  dist_weights <- input$init$dist_weights
+
+  # prior wave
+  simul_below_tol <- input$pwave$simul_below_tol
+  tab_weight <- input$pwave$tab_weight
+  sd_simul <- input$pwave$sd_simul
+  p_acc <- input$pwave$p_acc
+
+  final_res <- list(param = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
+                    stats = as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
+                    target = summary_stat_target,
+                    weights = tab_weight/sum(tab_weight), stats_normalization = as.numeric(sd_simul),
+                    epsilon = max(.compute_dist(summary_stat_target,
+                                                as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
+                                                sd_simul, dist_weights = dist_weights)),
+                    wave = wave, p_acc = p_acc)
+
+  return(final_res)
+
+}
+
+#' @export
+summary_abc <- function(input) {
+
+  cat("Wave:", input$wave)
+  cat("\np_acc:", input$p_acc)
+
+  paramSumm <- apply(input$param, 2, summary)
+  colnames(paramSumm) <- ""
+  statsSumm <- apply(input$stats, 2, summary)
+  colnames(statsSumm) <- ""
+
+  cat("\n\nTarget Stats: \n", input$target)
+  cat("\nSimulated Targets")
+  cat("\n-----------------")
+  print(statsSumm)
+
+  cat("\nEsimated Parameters")
+  cat("\n-------------------")
+  print(paramSumm)
 
 }
 
