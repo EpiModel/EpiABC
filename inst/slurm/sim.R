@@ -2,6 +2,8 @@
 library("methods")
 library("EpiABC")
 
+setwd("inst/slurm")
+
 rm(list = ls())
 toy_model_parallel <- function(x){
   set.seed(x[1])
@@ -24,8 +26,8 @@ prep
 wavedist <- prep
 wave <- 0
 for (i in 1:20) {
-  wavedat <- abc_smc_wave(input = wavedist, wave = wave, batch = NULL)
-  wavedist <- abc_smc_process(input = wavedat, wave = wave)
+  wavedat <- abc_smc_wave(input = wavedist, wave = wave, batch = NULL, save = FALSE)
+  wavedist <- abc_smc_process(input = wavedat, wave = wave, save = FALSE)
   cat("\n", wavedist$pwave$p_acc)
   wave <- wave + 1
 }
@@ -51,46 +53,39 @@ nBatches
 
 # run in batch model
 for (batch in 1:nBatches) {
-  wavedat <- abc_smc_wave(input = prep, wave = 0, batch = batch, save = TRUE, outdir = "dat/")
+  abc_smc_wave(input = prep, wave = 0, batch = batch)
   cat("\n Batch:", batch)
 }
 
 # interactive, or could run in batch mode by looking up file size done
-merge_abc(wave = 0, indir = "dat/", outdir = "dat/")
-abc_smc_process(input = "dat/", wave = 0, save = TRUE, outdir = "dat/")
+merge_abc(wave = 0)
+abc_smc_process(wave = 0)
 
 # write a new batch script
-nBatches <- ceiling(wavedat$init$nb_simul_step/wavedat$init$n_cluster)
+nBatches <- ceiling(prep$alpha*prep$nb_simul/prep$n_cluster)
 
 # run in batch mode
 for (batch in 1:nBatches) {
-  wavedat <- abc_smc_wave(input = wavedist, wave = 1, batch = batch, save = TRUE, outdir = "dat/")
+  abc_smc_wave(wave = 1, batch = batch)
   cat("\n Batch:", batch)
 }
 
 # interactive
-merge_abc(wave = 1, indir = "dat/", outdir = "dat/")
-wavedist <- abc_smc_process(input = "dat/", wave = 1)
-wavedist$pwave$p_acc
+merge_abc(wave = 1)
+abc_smc_process(wave = 1)
 
 # run in batch mode
 for (batch in 1:nBatches) {
-  wavedat <- abc_smc_wave(input = wavedist, wave = 2, batch = batch)
-  saveRDS(wavedat, file = paste0("dat/abc.wave2.batch", stringr::str_pad(batch, 5, pad = "0"), ".rda"))
+  abc_smc_wave(wave = 2, batch = batch)
   cat("\n Batch:", batch)
 }
 
 # interactive
-merge_abc(wave = 2, indir = "dat/", outdir = "dat/")
-wavedat <- readRDS("dat/abc.wave2.rda")
-wavedist <- abc_smc_process(input = wavedat, wave = 1)
-wavedist$pwave$p_acc
+merge_abc(wave = 2)
+abc_smc_process(wave = 2)
 
 
 ## TODO:
-## batch size = n_cluster # done
-## abc_smc_merge fx to combine output from abc_smc_wave, following same order
-## abc_smc_process runs on merged data
 ## master sim script does smart file names based on batch
 ## helper function to write sbatch scripts?
 

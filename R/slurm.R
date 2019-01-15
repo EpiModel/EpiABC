@@ -73,7 +73,12 @@ abc_smc_prep <- function(model,
 
 
 #' @export
-abc_smc_wave <- function(input, wave, batch, save = FALSE, outdir = "") {
+abc_smc_wave <- function(input = "data/", wave, batch, save = TRUE, outdir = "data/") {
+
+  if (class(input) == "character") {
+    file <- list.files(input, pattern = paste0("wave", wave - 1, ".rda"), full.names = TRUE)
+    input <- readRDS(file)
+  }
 
   if (wave == 0) {
 
@@ -119,7 +124,7 @@ abc_smc_wave <- function(input, wave, batch, save = FALSE, outdir = "") {
     tab_inic <- abc_waveN(input = input, batch = batch)
     out <- list(init = input$init, pwave = input$pwave, tab_inic = tab_inic)
     if (save == TRUE) {
-      saveRDS(wavedat, file = paste0(outdir, "abc.wave", wave, ".batch", stringr::str_pad(batch, 4, pad = "0"), ".rda"))
+      saveRDS(out, file = paste0(outdir, "abc.wave", wave, ".batch", stringr::str_pad(batch, 4, pad = "0"), ".rda"))
     } else {
       return(out)
     }
@@ -127,7 +132,7 @@ abc_smc_wave <- function(input, wave, batch, save = FALSE, outdir = "") {
 }
 
 #' @export
-abc_smc_process <- function(input, wave, save = FALSE, outdir = "") {
+abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/") {
 
   if (class(input) == "character") {
     file <- list.files(input, pattern = paste0("wave", wave, ".rda"), full.names = TRUE)
@@ -224,7 +229,7 @@ abc_smc_process <- function(input, wave, save = FALSE, outdir = "") {
                 cwave = list(list_param = list_param, tab_param = tab_param, k_acc = k_acc))
 
     if (save == TRUE) {
-      saveRDS(out, file = paste0(outdir, "abc.wave", wave, ".process", ".rda"))
+      saveRDS(out, file = paste0(outdir, "abc.wave", wave, ".rda"))
     } else {
       return(out)
     }
@@ -348,7 +353,7 @@ abc_smc_process <- function(input, wave, save = FALSE, outdir = "") {
                 cwave = list(list_param = list_param, tab_param = tab_param, k_acc = k_acc))
 
     if (save == TRUE) {
-      saveRDS(out, file = paste0(outdir, "abc.wave", wave, ".process", ".rda"))
+      saveRDS(out, file = paste0(outdir, "abc.wave", wave, ".rda"))
     } else {
       return(out)
     }
@@ -458,7 +463,7 @@ batch_to_sims <- function(batchSize, batchNum, totSims) {
 }
 
 #' @export
-merge_abc <- function(wave, indir = "", outdir = "") {
+merge_abc <- function(wave, indir = "data/", outdir = "data/") {
 
   files <- list.files(indir, pattern = paste0("wave", wave, ".batch"), full.names = TRUE)
 
