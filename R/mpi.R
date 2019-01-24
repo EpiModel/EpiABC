@@ -10,11 +10,6 @@
 #' rough posterior distribution to refine it. Sequential sampling schemes have
 #' been shown to be more efficient than standard rejection-based procedures.
 #'
-#' See the package's vignette for details on the four algorithms.
-#'
-#' @param method a character string indicating the sequential algorithm to be
-#'        used. Possible values are \code{"Beaumont"}, \code{"Drovandi"},
-#'        \code{"Delmoral"}, \code{"Lenormand"} and \code{"Emulation"}.
 #' @param model a \code{R} function implementing the model to be simulated. It
 #'        must take as arguments a vector of model parameter values and it
 #'        must return a vector of summary statistics. When using the option
@@ -177,161 +172,23 @@
 #' max number of fails when moving particle inside the prior. Enabled only if
 #' inside_prior is to \code{TRUE}. \code{10000} by default. } }
 #'
-#' @author Franck Jabot, Thierry Faure and Nicolas Dumoulin
+#' @export
 #'
-#' @seealso \code{\link{binary_model}}, \code{\link{binary_model_cluster}},
-#' \code{\link{ABC_rejection}}, \code{\link{ABC_emulation}},
-#' \code{\link{ABC_mcmc}}
-#'
-#' @references
-#' Beaumont, M. A., Cornuet, J., Marin, J., and Robert, C. P. (2009) Adaptive
-#' approximate Bayesian computation. \emph{Biometrika},\bold{96}, 983--990.
-#'
-#' Del Moral, P., Doucet, A., and Jasra, A. (2012) An adaptive sequential Monte
-#' Carlo method for approximate Bayesian computation. \emph{Statistics and
-#' Computing}, \bold{22}, 1009--1020.
-#'
-#' Drovandi, C. C. and Pettitt, A. N. (2011) Estimation of parameters for
-#' macroparasite population evolution using approximate Bayesian computation.
-#' \emph{Biometrics}, \bold{67}, 225--233.
-#'
-#' Lenormand, M., Jabot, F., Deffuant G. (2012) Adaptive approximate Bayesian
-#' computation for complex models. http://arxiv.org/pdf/1111.1308.pdf
-#'
-#' Jabot, F., Lagarrigues G., Courbaud B., Dumoulin N. (2015). A comparison of
-#' emulation methods for Approximate Bayesian Computation. To be published.
-#'
-#' @keywords abc model inference sequential_monte_carlo population_monte_carlo
-#' @examples
-#'
-#' \dontrun{
-#'     ##### EXAMPLE 1 #####
-#'     #####################
-#'     set.seed(1)
-#'
-#'     ## artificial example to show how to use the 'ABC_sequential' function.
-#'     ## defining a simple toy model:
-#'     toy_model<-function(x){ 2 * x + 5 + rnorm(1,0,0.1) }
-#'
-#'     ## define prior information
-#'     toy_prior=list(c("unif",0,1)) # a uniform prior distribution between 0 and 1
-#'
-#'     ## define the targeted summary statistics
-#'     sum_stat_obs=6.5
-#'
-#'     ## to perform the Beaumont et al. (2009)'s method:
-#'     ##
-#'     tolerance=c(1.5,0.5)
-#'     ABC_Beaumont<-ABC_sequential(method="Beaumont", model=toy_model, prior=toy_prior,
-#'     nb_simul=20, summary_stat_target=sum_stat_obs, tolerance_tab=tolerance)
-#'     ABC_Beaumont
-#'
-#'     ## to perform the Drovandi and Pettitt (2011)'s method:
-#'     ##
-#'     tolerance=0.5
-#'     c_drov=0.7
-#'     ABC_Drovandi<-ABC_sequential(method="Drovandi", model=toy_model, prior=toy_prior,
-#'     nb_simul=20, summary_stat_target=sum_stat_obs, tolerance_tab=tolerance, c=c_drov)
-#'     ABC_Drovandi
-#'
-#'     ## to perform the Del Moral et al. (2012)'s method:
-#'     ##
-#'     alpha_delmo=0.5
-#'     tolerance=0.5
-#'     ABC_Delmoral<-ABC_sequential(method="Delmoral", model=toy_model, prior=toy_prior,
-#'     nb_simul=20, summary_stat_target=sum_stat_obs, alpha=alpha_delmo, tolerance_target=tolerance)
-#'     ABC_Delmoral
-#'
-#'     ## to perform the Lenormand et al. (2012)'s method:
-#'     ##
-#'     pacc=0.4
-#'     ABC_Lenormand<-ABC_sequential(method="Lenormand", model=toy_model, prior=toy_prior,
-#'     nb_simul=20, summary_stat_target=sum_stat_obs, p_acc_min=pacc)
-#'     ABC_Lenormand
-#'
-#'
-#'     ##### EXAMPLE 2 #####
-#'     #####################
-#'
-#'     ## this time, the model has two parameters and outputs two summary statistics.
-#'     ## defining a simple toy model:
-#'     toy_model2<-function(x){ c( x[1] + x[2] + rnorm(1,0,0.1) , x[1] * x[2] + rnorm(1,0,0.1) ) }
-#'
-#'     ## define prior information
-#'     toy_prior2=list(c("unif",0,1),c("normal",1,2))
-#'     # a uniform prior distribution between 0 and 1 for parameter 1, and a normal distribution
-#'     # of mean 1 and standard deviation of 2 for parameter 2.
-#'
-#'     ## define the targeted summary statistics
-#'     sum_stat_obs2=c(1.5,0.5)
-#'
-#'     ## to perform the Beaumont et al. (2009)'s method:
-#'     ##
-#'     tolerance=c(1.5,0.5)
-#'     ABC_Beaumont<-ABC_sequential(method="Beaumont", model=toy_model2, prior=toy_prior2,
-#'     nb_simul=20, summary_stat_target=sum_stat_obs2, tolerance_tab=tolerance)
-#'     ABC_Beaumont
-#'
-#'     ## to perform the Drovandi and Pettitt (2011)'s method:
-#'     ##
-#'     tolerance=0.5
-#'     c_drov=0.7
-#'     ABC_Drovandi<-ABC_sequential(method="Drovandi", model=toy_model2, prior=toy_prior2,
-#'     nb_simul=20, summary_stat_target=sum_stat_obs2, tolerance_tab=tolerance, c=c_drov)
-#'     ABC_Drovandi
-#'
-#'     ## to perform the Del Moral et al. (2012)'s method:
-#'     ##
-#'     alpha_delmo=0.5
-#'     tolerance=0.5
-#'     ABC_Delmoral<-ABC_sequential(method="Delmoral", model=toy_model2, prior=toy_prior2,
-#'     nb_simul=20, summary_stat_target=sum_stat_obs2, alpha=alpha_delmo, tolerance_target=tolerance)
-#'     ABC_Delmoral
-#'
-#'     ## to perform the Lenormand et al. (2012)'s method:
-#'     ##
-#'     pacc=0.4
-#'     # Only uniform priors are supported for the method "Lenormand" (since it performs a Latin
-#'     # Hypercube sampling at the beginning):
-#'     toy_prior2=list(c("unif",0,1),c("unif",0.5,1.5))
-#'     # a uniform prior distribution between 0 and 1 for parameter 1, and a normal distribution of
-#'     # mean 1 and standard deviation of 1 for parameter 2.
-#'     ABC_Lenormand<-ABC_sequential(method="Lenormand", model=toy_model2, prior=toy_prior2,
-#'     nb_simul=20, summary_stat_target=sum_stat_obs2, p_acc_min=pacc)
-#'     ABC_Lenormand
-#'
-#'
-#'     ##### EXAMPLE 4 - Parallel implementations #####
-#'     ################################################
-#'
-#'     ## NB: the option use_seed must be turned to TRUE.
-#'
-#'     ## For models already running with the option use_seed=TRUE, simply change
-#'     # the value of n_cluster:
-#'     sum_stat_obs=c(100,2.5,20,30000)
-#'     ABC_Lenormand<-ABC_sequential(method="Lenormand", model=trait_model, prior=trait_prior,
-#'     nb_simul=20, summary_stat_target=sum_stat_obs, p_acc_min=pacc, use_seed=TRUE, n_cluster=2)
-#'     ABC_Lenormand
-#'
-#'     ## For other models, change the value of n_cluster and modify the model so that the
-#'     # first parameter becomes a seed information value:
-#'     toy_model_parallel<-function(x){
-#' 	set.seed(x[1])
-#' 	2 * x[2] + 5 + rnorm(1,0,0.1) }
-#'     sum_stat_obs=6.5
-#'
-#'     ABC_Lenormand<-ABC_sequential(method="Lenormand", model=toy_model_parallel, prior=toy_prior,
-#'     nb_simul=20, summary_stat_target=sum_stat_obs, p_acc_min=pacc, use_seed=TRUE, n_cluster=2)
-#'     ABC_Lenormand
-#' }
-#'
-#' @export ABC_sequential
-#'
-ABC_sequential <- function(method, model, prior, nb_simul, summary_stat_target, prior_test = NULL,
-                           n_cluster = 1, use_seed = FALSE, verbose = FALSE, dist_weights=NULL, cl, ...) {
+abc_smc_cluster <- function(model,
+                            prior,
+                            nb_simul,
+                            summary_stat_target,
+                            prior_test = NULL,
+                            n_cluster = 1,
+                            verbose = FALSE,
+                            dist_weights=NULL,
+                            cl,
+                            ...) {
+
+  use_seed <- TRUE
+
   ## checking errors in the inputs
-  if (missing(method))
-    stop("'method' is missing")
+
   if (missing(model))
     stop("'model' is missing")
   if (missing(prior))
@@ -346,9 +203,7 @@ ABC_sequential <- function(method, model, prior, nb_simul, summary_stat_target, 
     stop("'nb_simul' is missing")
   if (missing(summary_stat_target))
     stop("'summary_stat_target' is missing")
-  if (!any(method == c("Beaumont", "Drovandi", "Delmoral", "Lenormand", "Emulation"))) {
-    stop("Method must be Beaumont, Drovandi, Delmoral, Lenormand or Emulation")
-  }
+
   if (!is.vector(nb_simul))
     stop("'nb_simul' has to be a number.")
   if (length(nb_simul) > 1)
@@ -365,145 +220,114 @@ ABC_sequential <- function(method, model, prior, nb_simul, summary_stat_target, 
   if (n_cluster < 1)
     stop("'n_cluster' has to be a positive number.")
   n_cluster = floor(n_cluster)
-  if (!is.logical(use_seed))
-    stop("'use_seed' has to be boolean")
   if (!is.logical(verbose))
     stop("'verbose' has to be boolean")
-  if (!is.null(dist_weights) && length(dist_weights)!=length(summary_stat_target)) {
+  if (!is.null(dist_weights) && length(dist_weights) != length(summary_stat_target)) {
     stop("'dist_weights' has to be the same length than 'summary_stat_target'")
   }
   sequential = NULL
   if (n_cluster == 1) {
-    sequential = .ABC_sequential(method, model, prior, prior_test, nb_simul,
-                                 summary_stat_target, use_seed, verbose, dist_weights=dist_weights, ...)
+    stop("")
   } else {
-    if (method=="Emulation") {
-      stop("'Emulation' method isn't yet available in 'cluster' mode'")
-    }
-    if (use_seed == FALSE) {
-      stop("For parallel implementations, you must specify the option 'use_seed=TRUE'
-                 and modify your model accordingly - see the package's vignette for more details.")
-    }
-    sequential = .ABC_sequential_cluster(method, model, prior, prior_test, nb_simul,
-                                         summary_stat_target, n_cluster, use_seed, verbose,
-                                         dist_weights=dist_weights, cl, ...)
+    sequential <- abc_lenormand_cluster(model, prior, prior_test, nb_simul,
+                                        summary_stat_target, n_cluster, use_seed, verbose,
+                                        dist_weights = dist_weights, cl, ...)
   }
-  sequential
+  return(sequential)
 }
 
-.ABC_sequential_cluster <- function(method, model, prior, prior_test, nb_simul, summary_stat_target,
-                                    n_cluster, use_seed, verbose, dist_weights=NULL, cl, ...) {
-  if (use_seed == FALSE) {
-    stop("For parallel implementations, you must specify the option 'use_seed=TRUE' and modify your model accordingly -
-             see the package's vignette for more details.")
-  }
-  options(scipen = 50)
-  return(switch(EXPR = method,
-                Beaumont = .ABC_PMC_cluster(model, prior, prior_test,
-                                            nb_simul, summary_stat_target, n_cluster, verbose,
-                                            dist_weights = dist_weights, cl, ...),
-                Drovandi = .ABC_Drovandi_cluster(model,
-                                                 prior, nb_simul, summary_stat_target, n_cluster, verbose,
-                                                 dist_weights = dist_weights, cl,  ...),
-                Delmoral = .ABC_Delmoral_cluster(model,
-                                                 prior, prior_test, nb_simul, summary_stat_target, n_cluster,
-                                                 verbose, dist_weights = dist_weights, cl, ...),
-                Lenormand = .ABC_Lenormand_cluster(model = model, prior = prior, prior_test = prior_test,
-                                                   nb_simul = nb_simul, summary_stat_target = summary_stat_target,
-                                                   n_cluster = n_cluster, verbose = verbose,
-                                                   dist_weights = dist_weights, cl = cl, ...)))
-  options(scipen = 0)
-}
+abc_lenormand_cluster <- function(model,
+                                  prior,
+                                  prior_test,
+                                  nb_simul,
+                                  summary_stat_target,
+                                  n_cluster,
+                                  verbose,
+                                  alpha = 0.5,
+                                  p_acc_min = 0.05,
+                                  dist_weights=NULL,
+                                  cl,
+                                  seed_count = 0,
+                                  inside_prior = TRUE,
+                                  progress_bar = TRUE,
+                                  max_pick = 10000) {
 
-
-## sequential algorithm of Lenormand et al. 2012
-.ABC_Lenormand_cluster <- function(model, prior, prior_test, nb_simul, summary_stat_target,
-                                   n_cluster, verbose, alpha = 0.5, p_acc_min = 0.05,
-                                   dist_weights=NULL, cl, seed_count = 0,
-                                   inside_prior = TRUE, progress_bar = TRUE, max_pick=10000) {
-
-  ## checking errors in the inputs
-  if (!is.vector(alpha))
-    stop("'alpha' has to be a number.")
-  if (length(alpha) > 1)
-    stop("'alpha' has to be a number.")
-  if (alpha <= 0)
-    stop("'alpha' has to be between 0 and 1.")
-  if (alpha >= 1)
-    stop("'alpha' has to be between 0 and 1.")
-  if (!is.vector(p_acc_min))
-    stop("'p_acc_min' has to be a number.")
-  if (length(p_acc_min) > 1)
-    stop("'p_acc_min' has to be a number.")
-  if (p_acc_min <= 0)
-    stop("'p_acc_min' has to be between 0 and 1.")
-  if (p_acc_min >= 1)
-    stop("'p_acc_min' has to be between 0 and 1.")
-  if (!is.vector(seed_count))
-    stop("'seed_count' has to be a number.")
-  if (length(seed_count) > 1)
-    stop("'seed_count' has to be a number.")
-  if (seed_count < 0)
-    stop("'seed_count' has to be a positive number.")
-  seed_count = floor(seed_count)
+  if (!is.vector(alpha) || length(alpha) > 1)
+    stop("alpha has to be a number")
+  if (alpha <= 0 | alpha >= 1)
+    stop("alpha has to be between 0 and 1")
+  if (!is.vector(p_acc_min) || length(p_acc_min) > 1)
+    stop("p_acc_min has to be a number")
+  if (p_acc_min <= 0 | p_acc_min >= 1)
+    stop("p_acc_min has to be between 0 and 1")
+  if (!is.vector(seed_count) || length(seed_count) > 1 || seed_count < 0)
+    stop("seed_count has to be a positive number")
+  seed_count <- floor(seed_count)
   if (!is.logical(inside_prior))
-    stop("'inside_prior' has to be boolean.")
-  start = Sys.time()
-  if (progress_bar) {
+    stop("inside_prior has to be boolean")
+  start <- Sys.time()
+  if (progress_bar == TRUE) {
     print("## Lenormand et al. (2012)'s algorithm ##")
   }
 
-  seed_count_ini = seed_count
-  nparam = length(prior)
-  nstat = length(summary_stat_target)
+  seed_count_ini <- seed_count
+  nparam <- length(prior)
+  nstat <- length(summary_stat_target)
   if (!.all_unif(prior)) {
     stop("Prior distributions must be uniform to use the Lenormand et al. (2012)'s algorithm.")
   }
-  n_alpha = ceiling(nb_simul * alpha)
+  n_alpha <- ceiling(nb_simul * alpha)
 
   ## step 1 ABC rejection step with LHS
-  tab_ini = .ABC_rejection_lhs_cluster(model, prior, prior_test, nb_simul, seed_count, n_cluster, cl)
+  tab_ini <- abc_rejection_lhs_cluster(model,
+                                       prior,
+                                       prior_test,
+                                       nb_simul,
+                                       seed_count,
+                                       n_cluster,
+                                       cl)
   # initially, weights are equal
-  tab_weight = array(1, n_alpha)
-  seed_count = seed_count + nb_simul
+  tab_weight <- array(1, n_alpha)
+  seed_count <- seed_count + nb_simul
   # determination of the normalization constants in each dimension associated to
   # each summary statistic, this normalization will not change during all the
   # algorithm
-  sd_simul = sapply(as.data.frame(tab_ini[, (nparam + 1):(nparam + nstat)]), sd,
+  sd_simul <- sapply(as.data.frame(tab_ini[, (nparam + 1):(nparam + nstat)]), sd,
                     na.rm = TRUE)
   # selection of the alpha quantile closest simulations
-  simul_below_tol = NULL
-  simul_below_tol = rbind(simul_below_tol,
+  simul_below_tol <- NULL
+  simul_below_tol <- rbind(simul_below_tol,
                           .selec_simul_alpha(summary_stat_target,
                                              tab_ini[, 1:nparam],
                                              tab_ini[, (nparam + 1):(nparam + nstat)], sd_simul,
                                              alpha, dist_weights = dist_weights))
   # to be sure that there are not two or more simulations at a distance equal
   #   to the tolerance determined by the quantile
-  simul_below_tol = simul_below_tol[1:n_alpha, ]
-  tab_dist = .compute_dist(summary_stat_target,
-                           as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
-                           sd_simul, dist_weights = dist_weights)
+  simul_below_tol <- simul_below_tol[1:n_alpha, ]
+  tab_dist <- .compute_dist(summary_stat_target,
+                            as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
+                            sd_simul, dist_weights = dist_weights)
   if (!is.null(dist_weights)) {
-    tab_dist = tab_dist * (dist_weights/sum(dist_weights))
+    tab_dist <- tab_dist * (dist_weights/sum(dist_weights))
   }
-  tol_next = max(tab_dist)
-  intermediary_steps = list(NULL)
+  tol_next <- max(tab_dist)
+  intermediary_steps <- list(NULL)
   if (progress_bar) {
     print("Step 1 Completed ...")
   }
 
   ## following steps
-  p_acc = p_acc_min + 1
-  nb_simul_step = nb_simul - n_alpha
-  it = 1
+  p_acc <- p_acc_min + 1
+  nb_simul_step <- nb_simul - n_alpha
+  it <- 1
 
   while (p_acc > p_acc_min) {
-    it = it + 1
-    simul_below_tol2 = NULL
-    tab_inic = .ABC_launcher_not_uniformc_cluster(model = model,
+    it <- it + 1
+    simul_below_tol2 <- NULL
+    param_previous_step <- as.matrix(as.matrix(simul_below_tol)[, 1:nparam])
+    tab_inic <- abc_launcher_not_uniformc_cluster(model = model,
                                                   prior = prior,
-                                                  param_previous_step = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
+                                                  param_previous_step = param_previous_step,
                                                   tab_weight = tab_weight/sum(tab_weight),
                                                   nb_simul = nb_simul_step,
                                                   seed_count = seed_count,
@@ -511,51 +335,51 @@ ABC_sequential <- function(method, model, prior, nb_simul, summary_stat_target, 
                                                   n_cluster = n_cluster,
                                                   cl = cl,
                                                   max_pick = max_pick)
-    tab_ini = as.matrix(tab_inic[[1]])
-    tab_ini = as.numeric(tab_ini)
-    dim(tab_ini) = c(nb_simul_step, (nparam + nstat))
-    seed_count = seed_count + nb_simul_step
+    tab_ini <- as.matrix(tab_inic[[1]])
+    tab_ini <- as.numeric(tab_ini)
+    dim(tab_ini) <- c(nb_simul_step, (nparam + nstat))
+    seed_count <- seed_count + nb_simul_step
     if (!inside_prior) {
-      tab_weight2 = .compute_weightb(as.matrix(as.matrix(as.matrix(tab_ini)[, 1:nparam])),
-                                     as.matrix(as.matrix(as.matrix(simul_below_tol)[, 1:nparam])),
-                                     tab_weight/sum(tab_weight), prior)
+      tab_weight2 <- .compute_weightb(as.matrix(as.matrix(as.matrix(tab_ini)[, 1:nparam])),
+                                      as.matrix(as.matrix(as.matrix(simul_below_tol)[, 1:nparam])),
+                                      tab_weight/sum(tab_weight), prior)
     } else {
-      tab_weight2 = tab_inic[[2]] * (.compute_weightb(as.matrix(as.matrix(as.matrix(tab_ini)[,1:nparam])),
-                                                      as.matrix(as.matrix(as.matrix(simul_below_tol)[, 1:nparam])),
-                                                      tab_weight/sum(tab_weight), prior))
+      tab_weight2 <- tab_inic[[2]] * (.compute_weightb(as.matrix(as.matrix(as.matrix(tab_ini)[,1:nparam])),
+                                                       as.matrix(as.matrix(as.matrix(simul_below_tol)[, 1:nparam])),
+                                                       tab_weight/sum(tab_weight), prior))
     }
-    simul_below_tol2 = rbind(as.matrix(simul_below_tol), as.matrix(tab_ini))
-    tab_weight = c(tab_weight, tab_weight2)
-    tab_dist2 = .compute_dist(summary_stat_target,
-                              as.matrix(as.matrix(tab_ini)[, (nparam + 1):(nparam + nstat)]),
-                              sd_simul, dist_weights = dist_weights)
+    simul_below_tol2 <- rbind(as.matrix(simul_below_tol), as.matrix(tab_ini))
+    tab_weight <- c(tab_weight, tab_weight2)
+    tab_dist2 <- .compute_dist(summary_stat_target,
+                               as.matrix(as.matrix(tab_ini)[, (nparam + 1):(nparam + nstat)]),
+                               sd_simul, dist_weights = dist_weights)
     if (!is.null(dist_weights)) {
-      tab_dist2 = tab_dist2 * (dist_weights/sum(dist_weights))
+      tab_dist2 <- tab_dist2 * (dist_weights/sum(dist_weights))
     }
-    p_acc = length(tab_dist2[!is.na(tab_dist2) & tab_dist2 <= tol_next])/nb_simul_step
-    tab_dist = c(tab_dist, tab_dist2)
-    tol_next = sort(tab_dist)[n_alpha]
-    simul_below_tol2 = simul_below_tol2[!is.na(tab_dist) & tab_dist <= tol_next, ]
-    tab_weight = tab_weight[!is.na(tab_dist) & tab_dist <= tol_next]
-    tab_weight = tab_weight[1:n_alpha]
-    tab_dist = tab_dist[!is.na(tab_dist) & tab_dist <= tol_next]
-    odist = order(tab_dist, decreasing = FALSE)[1:n_alpha]
-    tab_dist_new = tab_dist
-    simul_below_tol = matrix(0, n_alpha, (nparam + nstat))
+    p_acc <- length(tab_dist2[!is.na(tab_dist2) & tab_dist2 <= tol_next])/nb_simul_step
+    tab_dist <- c(tab_dist, tab_dist2)
+    tol_next <- sort(tab_dist)[n_alpha]
+    simul_below_tol2 <- simul_below_tol2[!is.na(tab_dist) & tab_dist <= tol_next, ]
+    tab_weight <- tab_weight[!is.na(tab_dist) & tab_dist <= tol_next]
+    tab_weight <- tab_weight[1:n_alpha]
+    tab_dist <- tab_dist[!is.na(tab_dist) & tab_dist <= tol_next]
+    odist <- order(tab_dist, decreasing = FALSE)[1:n_alpha]
+    tab_dist_new <- tab_dist
+    simul_below_tol <- matrix(0, n_alpha, (nparam + nstat))
     for (i1 in 1:n_alpha) {
-      tab_dist_new[i1] = tab_dist[odist[i1]]
+      tab_dist_new[i1] <- tab_dist[odist[i1]]
       for (i2 in 1:(nparam + nstat)) {
-        simul_below_tol[i1, i2] = as.numeric(simul_below_tol2[odist[i1], i2])
+        simul_below_tol[i1, i2] <- as.numeric(simul_below_tol2[odist[i1], i2])
       }
     }
-    tab_dist = tab_dist_new[1:n_alpha]
+    tab_dist <- tab_dist_new[1:n_alpha]
     if (progress_bar) {
       print(paste("Step ", it, " Completed: p_acc = ", p_acc, sep = ""))
     }
   }
 
-  final_res = NULL
-  final_res = list(param = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
+  final_res <- NULL
+  final_res <- list(param = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
                    stats = as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
                    weights = tab_weight/sum(tab_weight), stats_normalization = as.numeric(sd_simul),
                    epsilon = max(.compute_dist(summary_stat_target,
@@ -564,75 +388,83 @@ ABC_sequential <- function(method, model, prior, nb_simul, summary_stat_target, 
                    nsim = (seed_count - seed_count_ini), computime = as.numeric(difftime(Sys.time(),
                                                                                          start, units = "secs")))
 
-  final_res
+  return(final_res)
 }
 
+abc_rejection_lhs_cluster <- function(model,
+                                      prior,
+                                      prior_test,
+                                      nb_simul,
+                                      seed_count,
+                                      n_cluster,
+                                      cl) {
 
-## function to sample in the prior distributions using a Latin Hypercube sample
-.ABC_rejection_lhs_cluster <- function(model, prior, prior_test, nb_simul, seed_count,
-                                       n_cluster, cl) {
-
-  tab_simul_summarystat = NULL
-  tab_param = NULL
-  list_param = list(NULL)
-  # n_end = nb_simul
-  nparam = length(prior)
-  l = length(prior)
-  random_tab = NULL
-  all_unif_prior = .all_unif(prior)
+  tab_simul_summarystat <- NULL
+  tab_param <- NULL
+  list_param <- list(NULL)
+  # n_end <- nb_simul
+  nparam <- length(prior)
+  l <- length(prior)
+  random_tab <- NULL
+  all_unif_prior <- .all_unif(prior)
   if (all_unif_prior) {
-    random_tab = randomLHS(nb_simul, nparam)
+    random_tab <- randomLHS(nb_simul, nparam)
   }
 
-  list_param = list(NULL)
+  list_param <- list(NULL)
   for (i in 1:nb_simul) {
-    param = array(0, l)
+    param <- array(0, l)
     if (!all_unif_prior) {
-      param = .sample_prior(prior, prior_test)
+      param <- .sample_prior(prior, prior_test)
     } else {
       for (j in 1:l) {
-        param[j] = as.numeric(prior[[j]]$sampleArgs[2]) +
+        param[j] <- as.numeric(prior[[j]]$sampleArgs[2]) +
           (as.numeric(prior[[j]]$sampleArgs[3]) - as.numeric(prior[[j]]$sampleArgs[2])) *
           random_tab[i, j]
       }
     }
-    param = c((seed_count + i), param)
-    list_param[[i]] = param
-    tab_param = rbind(tab_param, param[2:(l + 1)])
+    param <- c((seed_count + i), param)
+    list_param[[i]] <- param
+    tab_param <- rbind(tab_param, param[2:(l + 1)])
   }
-  seed_count = seed_count + nb_simul
-  list_simul_summarystat = parLapplyLB(cl, list_param, model)
+  seed_count <- seed_count + nb_simul
+  list_simul_summarystat <- parLapplyLB(cl, list_param, model)
   for (i in 1:nb_simul) {
-    tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
+    tab_simul_summarystat <- rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
   }
 
   options(scipen = 0)
-  cbind(tab_param, tab_simul_summarystat)
+  out <- cbind(tab_param, tab_simul_summarystat)
+  return(out)
 }
 
+abc_launcher_not_uniformc_cluster <- function(model,
+                                              prior,
+                                              param_previous_step,
+                                              tab_weight,
+                                              nb_simul,
+                                              seed_count,
+                                              inside_prior,
+                                              n_cluster,
+                                              cl,
+                                              max_pick = 10000) {
+  tab_simul_summarystat <- NULL
+  tab_param <- NULL
+  k_acc <- 0
+  list_param <- list(NULL)
 
-## function to perform ABC simulations from a non-uniform prior (derived from a
-## set of particles)
-.ABC_launcher_not_uniformc_cluster <- function(model, prior, param_previous_step,
-                                               tab_weight, nb_simul, seed_count,
-                                               inside_prior, n_cluster, cl, max_pick = 10000) {
-  tab_simul_summarystat = NULL
-  tab_param = NULL
-  k_acc = 0
-  list_param = list(NULL)
-
-  list_param = list(NULL)
+  list_param <- list(NULL)
   for (i in 1:nb_simul) {
-    l = dim(param_previous_step)[2]
-    counter = 0
+    l <- dim(param_previous_step)[2]
+    counter <- 0
     repeat {
-      k_acc = k_acc + 1
-      counter = counter + 1
+      k_acc <- k_acc + 1
+      counter <- counter + 1
       # pick a particle
-      param_picked = .particle_pick(param_previous_step, tab_weight)
+      param_picked <- .particle_pick(param_previous_step, tab_weight)
       # move it
       # only variable parameters are moved, computation of a WEIGHTED variance
-      param_moved = .move_particle(as.numeric(param_picked),
+      param_moved <- .move_particle(as.numeric(param_picked),
                                    2 * cov.wt(as.matrix(as.matrix(param_previous_step)),
                                               as.vector(tab_weight))$cov)
       if ((!inside_prior) || (.is_included(param_moved, prior)) || (counter >= max_pick)) {
@@ -643,17 +475,18 @@ ABC_sequential <- function(method, model, prior, nb_simul, summary_stat_target, 
       stop("The proposal jumps outside of the prior distribution too often -
                    consider using the option 'inside_prior=FALSE' or enlarging the prior distribution")
     }
-    param = param_previous_step[1, ]
-    param = param_moved
-    param = c((seed_count + i), param)
-    list_param[[i]] = param
-    tab_param = rbind(tab_param, param[2:(l + 1)])
+    param <- param_previous_step[1, ]
+    param <- param_moved
+    param <- c((seed_count + i), param)
+    list_param[[i]] <- param
+    tab_param <- rbind(tab_param, param[2:(l + 1)])
   }
-  seed_count = seed_count + nb_simul
-  list_simul_summarystat = parLapplyLB(cl, list_param, model)
+  seed_count <- seed_count + nb_simul
+  list_simul_summarystat <- parLapplyLB(cl, list_param, model)
   for (i in 1:nb_simul) {
-    tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
+    tab_simul_summarystat <- rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
   }
 
-  list(cbind(tab_param, tab_simul_summarystat), nb_simul/k_acc)
+  out <- list(cbind(tab_param, tab_simul_summarystat), nb_simul/k_acc)
+  return(out)
 }
