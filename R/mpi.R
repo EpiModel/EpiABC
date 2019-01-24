@@ -1,5 +1,6 @@
 
-#' Sequential sampling schemes for ABC
+#' Approximate Bayesian Computation with Sequential Monte Carlo Sampling on
+#' High-Performance Computing Clusters
 #'
 #' This function implements four different algorithms to perform sequential
 #' sampling schemes for ABC. Sequential sampling schemes consist in sampling
@@ -384,7 +385,8 @@ ABC_sequential <- function(method, model, prior, nb_simul, summary_stat_target, 
                  and modify your model accordingly - see the package's vignette for more details.")
     }
     sequential = .ABC_sequential_cluster(method, model, prior, prior_test, nb_simul,
-                                         summary_stat_target, n_cluster, use_seed, verbose, dist_weights=dist_weights, cl, ...)
+                                         summary_stat_target, n_cluster, use_seed, verbose,
+                                         dist_weights=dist_weights, cl, ...)
   }
   sequential
 }
@@ -556,9 +558,11 @@ ABC_sequential <- function(method, model, prior, nb_simul, summary_stat_target, 
   final_res = list(param = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
                    stats = as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
                    weights = tab_weight/sum(tab_weight), stats_normalization = as.numeric(sd_simul),
-                   epsilon = max(.compute_dist(summary_stat_target, as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
+                   epsilon = max(.compute_dist(summary_stat_target,
+                                               as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
                                                sd_simul, dist_weights = dist_weights)),
-                   nsim = (seed_count - seed_count_ini), computime = as.numeric(difftime(Sys.time(), start, units = "secs")))
+                   nsim = (seed_count - seed_count_ini), computime = as.numeric(difftime(Sys.time(),
+                                                                                         start, units = "secs")))
 
   final_res
 }

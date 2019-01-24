@@ -2,7 +2,7 @@
 library("methods")
 library("Rmpi")
 library("snow")
-library("EasyABCMPI")
+library("EpiABC")
 
 uni <- mpi.universe.size()-1
 print(uni)
