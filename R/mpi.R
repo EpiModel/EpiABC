@@ -85,11 +85,11 @@ abc_smc_cluster <- function(model,
     stop("nsims must be a number larger than 1.")
   nsims <- floor(nsims)
   if (!is.vector(summary_stat_target))
-    stop("summary_stat_target has to be a vector.")
+    stop("summary_stat_target must be a vector.")
   if (!is.logical(verbose))
-    stop("verbose has to be boolean")
+    stop("verbose must be boolean")
   if (!is.null(dist_weights) && length(dist_weights) != length(summary_stat_target)) {
-    stop("'dist_weights' has to be the same length than 'summary_stat_target'")
+    stop("'dist_weights' must be the same length than 'summary_stat_target'")
   }
 
   sequential <- abc_lenormand_cluster(model = model, prior = prior,
@@ -118,21 +118,21 @@ abc_lenormand_cluster <- function(model,
                                   max_pick = 10000) {
 
   if (!is.vector(alpha) || length(alpha) > 1)
-    stop("alpha has to be a number")
+    stop("alpha must be a number")
   if (alpha <= 0 | alpha >= 1)
-    stop("alpha has to be between 0 and 1")
+    stop("alpha must be between 0 and 1")
   if (!is.vector(p_acc_min) || length(p_acc_min) > 1)
-    stop("p_acc_min has to be a number")
+    stop("p_acc_min must be a number")
   if (p_acc_min <= 0 | p_acc_min >= 1)
-    stop("p_acc_min has to be between 0 and 1")
+    stop("p_acc_min must be between 0 and 1")
   if (!is.vector(seed_count) || length(seed_count) > 1 || seed_count < 0)
-    stop("seed_count has to be a positive number")
+    stop("seed_count must be a positive number")
   seed_count <- floor(seed_count)
   if (!is.logical(inside_prior))
-    stop("inside_prior has to be boolean")
+    stop("inside_prior must be boolean")
   start <- Sys.time()
   if (progress_bar == TRUE) {
-    print("## Lenormand et al. (2012)'s algorithm ##")
+    print("## Lenormand Algorithm ##")
   }
 
   seed_count_ini <- seed_count

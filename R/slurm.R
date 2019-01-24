@@ -31,12 +31,12 @@ abc_smc_prep <- function(model,
     stop("nsims must be a number larger than 1.")
   nsims <- floor(nsims)
   if (!is.vector(summary_stat_target))
-    stop("'summary_stat_target' has to be a vector.")
+    stop("summary_stat_target must be a vector.")
   if (!is.vector(ncores) || length(ncores) > 1 || ncores < 1)
-    stop("'ncores' has to be a positive number.")
+    stop("ncores must be a positive number.")
   ncores <- floor(ncores)
   if (!is.null(dist_weights) && length(dist_weights) != length(summary_stat_target)) {
-    stop("'dist_weights' has to be the same length than 'summary_stat_target'")
+    stop("dist_weights must be the same length than 'summary_stat_target'")
   }
 
   # batch sizes for wave 0 and waves 1+
