@@ -7,29 +7,12 @@
 #'
 #' @param model a \code{R} function implementing the model to be simulated. It
 #'        must take as arguments a vector of model parameter values and it
-#'        must return a vector of summary statistics. When using the option
-#'       \code{use_seed=TRUE}, \code{model} must take as arguments a vector
-#'       containing a seed value and the model parameter values. A tutorial
-#'       is provided in the package's vignette to dynamically link a binary
-#'       code to a \code{R} function. Users may alternatively wish to wrap
-#'       their binary executables using the provided functions
-#'       \code{\link{binary_model}} and \code{\link{binary_model_cluster}}.
-#'       The use of these functions is associated with slightly different
-#'       constraints on the design of the binary code (see
-#'       \code{\link{binary_model}} and \code{\link{binary_model_cluster}}).
+#'        must return a vector of summary statistics.
 #' @param prior a list of prior information. Each element of the list
 #'        corresponds to a model parameter. The list element must be a vector
-#'        whose first argument determines the type of prior distribution:
-#'        possible values are \code{"unif"} for a uniform distribution on
-#'        a segment, \code{"normal"} for a normal distribution,
-#'        \code{"lognormal"} for a lognormal distribution or \code{"exponential"}
-#'        for an exponential distribution.
-#' @param nb_simul a positive integer equal to the desired number of simulations
-#'        of the model below the tolerance threshold when \code{method} is
-#'        \code{"Beaumont"}, \code{"Drovandi"} and \code{"Delmoral"}.
-#'        When \code{method} is \code{"Lenormand"}, the number of simulations
-#'        below the tolerance threshold is equal to \code{nb_simul * alpha}.
-#'        See the package's vignette and Lenormand et al. (2012) for details.
+#'        whose first argument determines the type of prior distribution.
+#' @param nb_simul the number of simulations below the tolerance threshold is
+#'        equal to \code{nb_simul * alpha}.
 #' @param summary_stat_target a vector containing the targeted (observed)
 #'        summary statistics.
 #' @param prior_test a string expressing the constraints between model
@@ -115,7 +98,7 @@ abc_smc_cluster <- function(model,
   if (!is.null(dist_weights) && length(dist_weights) != length(summary_stat_target)) {
     stop("'dist_weights' has to be the same length than 'summary_stat_target'")
   }
-  sequential <- NULL
+
   if (n_cluster == 1) {
     stop("This version of ABC-SMC designed for multi-core, set n_cluster > 1")
   } else {
