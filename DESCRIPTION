@@ -22,7 +22,8 @@ Imports:
     parallel,
     lhs,
     tensorA,
-    snow
+    snow,
+    stringr
 Suggests:
     Rmpi
 LazyLoad: yes
