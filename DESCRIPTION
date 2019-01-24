@@ -2,17 +2,18 @@ Package: EpiABC
 Version: 1.0
 Date: 2019-01-14
 Title: Approximate Bayesian Computation for EpiModel on High-Performance Computing Clusters
-Description: Implementation of Approximate Bayesian Computation with Sequential 
-    Monte Carlo Methods (ABC-SMC) optimized for use with EpiModel R package epidemic
-    simulations running on High-Performance Computing (HPC) cluster environments such
-    as MPI and Slurm.
+Description: Implementation of Approximate Bayesian Computation with Sequential Monte Carlo
+    Methods (ABC-SMC) optimized for use with EpiModel R package epidemic simulations
+    running on High-Performance Computing (HPC) cluster environments such as MPI
+    and Slurm. This package uses AMC-SMC algorithms originally developed for the
+    EasyABC R package.
 Author: Samuel Jenness, with original ABC-SMC statistical algorithms based on the 
-            EasyABC R package developed by Franck Jabot, Thierry Faure, Nicolas Dumoulin, 
-            and Carlo Albert.
+            EasyABC R package (authors: Franck Jabot, Thierry Faure, Nicolas Dumoulin, 
+            and Carlo Albert).
 Maintainer: Samuel Jenness <samuel.m.jenness@emory.edu>
 License: GPL-3
 Depends: 
-    R (>= 2.14.0),
+    R (>= 3.2.0),
     abc
 Imports: 
     pls,
