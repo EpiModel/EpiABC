@@ -49,6 +49,7 @@
 #'        be used to give more importance to a summary statistisc for example.
 #'        The weights will be normalized before applying them. If not provided,
 #'        no weights will be applied.
+#' @param cl cluster object, such as that produced by \code{snow::makeCluster}.
 #' @param \dots Additional arguments can be passed depending on the choosen
 #'        method (see below).
 #'
