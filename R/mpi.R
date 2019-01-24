@@ -181,7 +181,7 @@ abc_smc_cluster <- function(model,
                             prior_test = NULL,
                             n_cluster = 1,
                             verbose = FALSE,
-                            dist_weights=NULL,
+                            dist_weights = NULL,
                             cl,
                             ...) {
 
@@ -229,9 +229,10 @@ abc_smc_cluster <- function(model,
   if (n_cluster == 1) {
     stop("")
   } else {
-    sequential <- abc_lenormand_cluster(model, prior, prior_test, nb_simul,
-                                        summary_stat_target, n_cluster, use_seed, verbose,
-                                        dist_weights = dist_weights, cl, ...)
+    sequential <- abc_lenormand_cluster(model = model, prior = prior, prior_test = prior_test,
+                                        nb_simul = nb_simul, summary_stat_target = summary_stat_target,
+                                        n_cluster = n_cluster, verbose = verbose,
+                                        dist_weights = dist_weights, cl = cl, ...)
   }
   return(sequential)
 }
@@ -245,7 +246,7 @@ abc_lenormand_cluster <- function(model,
                                   verbose,
                                   alpha = 0.5,
                                   p_acc_min = 0.05,
-                                  dist_weights=NULL,
+                                  dist_weights = NULL,
                                   cl,
                                   seed_count = 0,
                                   inside_prior = TRUE,
