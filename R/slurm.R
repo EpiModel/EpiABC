@@ -8,68 +8,49 @@ abc_smc_prep <- function(model,
                          n_cluster = 2,
                          dist_weights = NULL,
                          alpha = 0.5,
-                         p_acc_min = 0.1,
                          ...) {
+
+  p_acc_min <- 0.1
 
   ## checking errors in the inputs
   if (missing(model))
-    stop("'model' is missing")
+    stop("model is missing")
   if (missing(prior))
-    stop("'prior' is missing")
-  data = .wrap_constants_in_model(prior, model, use_seed = TRUE)
-  prior = data$new_prior
-  model = data$new_model
-  prior = .process_prior(prior)
+    stop("prior is missing")
+  data <- .wrap_constants_in_model(prior, model, use_seed = TRUE)
+  prior <- data$new_prior
+  model <- data$new_model
+  prior <- .process_prior(prior)
   if (!is.null(prior_test))
     .check_prior_test(length(prior), prior_test)
   if (missing(nb_simul))
-    stop("'nb_simul' is missing")
+    stop("nb_simul is missing")
   if (missing(summary_stat_target))
-    stop("'summary_stat_target' is missing")
-  if (!is.vector(nb_simul))
-    stop("'nb_simul' has to be a number.")
-  if (length(nb_simul) > 1)
-    stop("'nb_simul' has to be a number.")
-  if (nb_simul < 1)
-    stop("'nb_simul' must be a number larger than 1.")
-  nb_simul = floor(nb_simul)
+    stop("summary_stat_target is missing")
+  if (!is.vector(nb_simul) || length(nb_simul) > 1 || nb_simul < 1)
+    stop("nb_simul must be a number larger than 1.")
+  nb_simul <- floor(nb_simul)
   if (!is.vector(summary_stat_target))
     stop("'summary_stat_target' has to be a vector.")
-  if (!is.vector(n_cluster))
-    stop("'n_cluster' has to be a number.")
-  if (length(n_cluster) > 1)
-    stop("'n_cluster' has to be a number.")
-  if (n_cluster < 1)
+  if (!is.vector(n_cluster) || length(n_cluster) > 1 || n_cluster < 1)
     stop("'n_cluster' has to be a positive number.")
-  n_cluster = floor(n_cluster)
+  n_cluster <- floor(n_cluster)
   if (!is.null(dist_weights) && length(dist_weights) != length(summary_stat_target)) {
     stop("'dist_weights' has to be the same length than 'summary_stat_target'")
   }
-  if (!is.vector(alpha))
-    stop("'alpha' has to be a number.")
-  if (length(alpha) > 1)
-    stop("'alpha' has to be a number.")
-  if (alpha <= 0)
-    stop("'alpha' has to be between 0 and 1.")
-  if (alpha >= 1)
-    stop("'alpha' has to be between 0 and 1.")
-  if (!is.vector(p_acc_min))
-    stop("'p_acc_min' has to be a number.")
-  if (length(p_acc_min) > 1)
-    stop("'p_acc_min' has to be a number.")
-  if (p_acc_min <= 0)
-    stop("'p_acc_min' has to be between 0 and 1.")
-  if (p_acc_min >= 1)
-    stop("'p_acc_min' has to be between 0 and 1.")
+
+  # batch sizes for wave 0 and waves 1+
+  batchSize <- c(ceiling(nb_simul/n_cluster),
+                 ceiling((nb_simul - ceiling(nb_simul * alpha))/n_cluster))
 
   out <- list(model = model, prior = prior, prior_test = prior_test,
-              nb_simul = nb_simul, summary_stat_target = summary_stat_target,
+              nb_simul = nb_simul, batchSize = batchSize,
+              summary_stat_target = summary_stat_target,
               n_cluster = n_cluster, dist_weights = dist_weights,
               alpha = alpha, p_acc_min = p_acc_min)
 
   return(out)
 }
-
 
 
 #' @export
@@ -114,7 +95,8 @@ abc_smc_wave <- function(input = "data/", wave, batch, save = TRUE, outdir = "da
     out <- list(init = input, seed_count = seed_count, tab_ini = tab_ini)
 
     if (save == TRUE) {
-      saveRDS(out, file = paste0(outdir, "abc.wave0.batch", stringr::str_pad(batch, 4, pad = "0"), ".rda"))
+      saveRDS(out, file = paste0(outdir, "abc.wave0.batch",
+                                 stringr::str_pad(batch, 4, pad = "0"), ".rda"))
     } else {
       return(out)
     }
@@ -124,7 +106,8 @@ abc_smc_wave <- function(input = "data/", wave, batch, save = TRUE, outdir = "da
     tab_inic <- abc_waveN(input = input, batch = batch)
     out <- list(init = input$init, pwave = input$pwave, tab_inic = tab_inic)
     if (save == TRUE) {
-      saveRDS(out, file = paste0(outdir, "abc.wave", wave, ".batch", stringr::str_pad(batch, 4, pad = "0"), ".rda"))
+      saveRDS(out, file = paste0(outdir, "abc.wave", wave, ".batch",
+                                 stringr::str_pad(batch, 4, pad = "0"), ".rda"))
     } else {
       return(out)
     }
