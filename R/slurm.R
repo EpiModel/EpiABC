@@ -2,10 +2,10 @@
 #' @export
 abc_smc_prep <- function(model,
                          prior,
-                         nb_simul,
+                         nsims,
                          summary_stat_target,
                          prior_test = NULL,
-                         n_cluster = 2,
+                         ncores = 2,
                          dist_weights = NULL,
                          alpha = 0.5,
                          ...) {
@@ -23,30 +23,30 @@ abc_smc_prep <- function(model,
   prior <- .process_prior(prior)
   if (!is.null(prior_test))
     .check_prior_test(length(prior), prior_test)
-  if (missing(nb_simul))
-    stop("nb_simul is missing")
+  if (missing(nsims))
+    stop("nsims is missing")
   if (missing(summary_stat_target))
     stop("summary_stat_target is missing")
-  if (!is.vector(nb_simul) || length(nb_simul) > 1 || nb_simul < 1)
-    stop("nb_simul must be a number larger than 1.")
-  nb_simul <- floor(nb_simul)
+  if (!is.vector(nsims) || length(nsims) > 1 || nsims < 1)
+    stop("nsims must be a number larger than 1.")
+  nsims <- floor(nsims)
   if (!is.vector(summary_stat_target))
     stop("'summary_stat_target' has to be a vector.")
-  if (!is.vector(n_cluster) || length(n_cluster) > 1 || n_cluster < 1)
-    stop("'n_cluster' has to be a positive number.")
-  n_cluster <- floor(n_cluster)
+  if (!is.vector(ncores) || length(ncores) > 1 || ncores < 1)
+    stop("'ncores' has to be a positive number.")
+  ncores <- floor(ncores)
   if (!is.null(dist_weights) && length(dist_weights) != length(summary_stat_target)) {
     stop("'dist_weights' has to be the same length than 'summary_stat_target'")
   }
 
   # batch sizes for wave 0 and waves 1+
-  batchSize <- c(ceiling(nb_simul/n_cluster),
-                 ceiling((nb_simul - ceiling(nb_simul * alpha))/n_cluster))
+  batchSize <- c(ceiling(nsims/ncores),
+                 ceiling((nsims - ceiling(nsims * alpha))/ncores))
 
   out <- list(model = model, prior = prior, prior_test = prior_test,
-              nb_simul = nb_simul, batchSize = batchSize,
+              nsims = nsims, batchSize = batchSize,
               summary_stat_target = summary_stat_target,
-              n_cluster = n_cluster, dist_weights = dist_weights,
+              ncores = ncores, dist_weights = dist_weights,
               alpha = alpha, p_acc_min = p_acc_min)
 
   return(out)
@@ -67,9 +67,9 @@ abc_smc_wave <- function(input = "data/", wave, batch, save = TRUE, outdir = "da
     model <- input$model
     prior <- input$prior
     prior_test <- input$prior_test
-    nb_simul <- input$nb_simul
+    nsims <- input$nsims
     summary_stat_target <- input$summary_stat_target
-    n_cluster <- input$n_cluster
+    ncores <- input$ncores
     alpha <- input$alpha
 
     seed_count <- 0
@@ -81,15 +81,15 @@ abc_smc_wave <- function(input = "data/", wave, batch, save = TRUE, outdir = "da
     if (!.all_unif(prior)) {
       stop("Prior distributions must be uniform")
     }
-    n_alpha <- input$n_alpha <- ceiling(nb_simul * alpha)
-    input$nb_simul_step <- nb_simul - n_alpha
+    n_alpha <- input$n_alpha <- ceiling(nsims * alpha)
+    input$nsims_step <- nsims - n_alpha
 
     tab_ini <- abc_wave0(model,
                          prior,
                          prior_test,
-                         nb_simul,
+                         nsims,
                          seed_count,
-                         n_cluster,
+                         ncores,
                          batch = batch)
 
     out <- list(init = input, seed_count = seed_count, tab_ini = tab_ini)
@@ -130,8 +130,8 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
     n_alpha <- input$init$n_alpha
     nparam <- input$init$nparam
     nstat <- input$init$nstat
-    nb_simul <- input$init$nb_simul
-    nb_simul_step <- input$init$nb_simul_step
+    nsims <- input$init$nsims
+    nsims_step <- input$init$nsims_step
     summary_stat_target <- input$init$summary_stat_target
     alpha <- input$init$alpha
     dist_weights <- input$init$dist_weights
@@ -145,7 +145,7 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
 
     # initially, weights are equal
     tab_weight <- array(1, n_alpha)
-    seed_count <- seed_count + nb_simul
+    seed_count <- seed_count + nsims
     sd_simul <- sapply(as.data.frame(tab_ini[, (nparam + 1):(nparam + nstat)]), sd,
                        na.rm = TRUE)
     # selection of the alpha quantile closest simulations
@@ -177,7 +177,7 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
     list_param <- list(NULL)
 
     list_param <- list(NULL)
-    for (i in 1:nb_simul_step) {
+    for (i in 1:nsims_step) {
       l <- dim(param_previous_step)[2]
       counter <- 0
       repeat {
@@ -204,7 +204,7 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
       list_param[[i]] <- param
       tab_param <- rbind(tab_param, param[2:(l + 1)])
     }
-    seed_count <- seed_count + nb_simul_step
+    seed_count <- seed_count + nsims_step
 
     out <- list(init = input$init,
                 pwave = list(tab_weight = tab_weight, seed_count = seed_count,
@@ -227,11 +227,11 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
     n_alpha <- input$init$n_alpha
     nparam <- input$init$nparam
     nstat <- input$init$nstat
-    nb_simul <- input$init$nb_simul
+    nsims <- input$init$nsims
     summary_stat_target <- input$init$summary_stat_target
     dist_weights <- input$init$dist_weights
     inside_prior <- input$init$inside_prior
-    nb_simul_step <- input$init$nb_simul_step
+    nsims_step <- input$init$nsims_step
     max_pick <- input$init$max_pick
 
     # prior wave
@@ -253,8 +253,8 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
 
     tab_ini <- as.matrix(tab_inic[[1]])
     tab_ini <- as.numeric(tab_ini)
-    dim(tab_ini) <- c(nb_simul_step, (nparam + nstat))
-    seed_count <- seed_count + nb_simul_step
+    dim(tab_ini) <- c(nsims_step, (nparam + nstat))
+    seed_count <- seed_count + nsims_step
     if (!inside_prior) {
       tab_weight2 <- .compute_weightb(as.matrix(as.matrix(as.matrix(tab_ini)[, 1:nparam])),
                                       as.matrix(as.matrix(as.matrix(simul_below_tol)[, 1:nparam])),
@@ -272,7 +272,7 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
     if (!is.null(dist_weights)) {
       tab_dist2 <- tab_dist2 * (dist_weights/sum(dist_weights))
     }
-    p_acc <- length(tab_dist2[!is.na(tab_dist2) & tab_dist2 <= tol_next])/nb_simul_step
+    p_acc <- length(tab_dist2[!is.na(tab_dist2) & tab_dist2 <= tol_next])/nsims_step
     tab_dist <- c(tab_dist, tab_dist2)
     tol_next <- sort(tab_dist)[n_alpha]
     simul_below_tol2 <- simul_below_tol2[!is.na(tab_dist) & tab_dist <= tol_next, ]
@@ -301,7 +301,7 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
     list_param <- list(NULL)
 
     list_param <- list(NULL)
-    for (i in 1:nb_simul_step) {
+    for (i in 1:nsims_step) {
       l <- dim(param_previous_step)[2]
       counter <- 0
       repeat {
@@ -328,7 +328,7 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
       list_param[[i]] <- param
       tab_param <- rbind(tab_param, param[2:(l + 1)])
     }
-    seed_count <- seed_count + nb_simul_step
+    seed_count <- seed_count + nsims_step
 
     out <- list(init = input$init,
                 pwave = list(tab_weight = tab_weight, seed_count = seed_count,
@@ -407,9 +407,9 @@ summary_abc <- function(input) {
 abc_wave0 <- function(model,
                       prior,
                       prior_test,
-                      nb_simul,
+                      nsims,
                       seed_count,
-                      n_cluster,
+                      ncores,
                       batch) {
 
   tab_param <- NULL
@@ -419,11 +419,11 @@ abc_wave0 <- function(model,
   random_tab <- NULL
   all_unif_prior <- .all_unif(prior)
   if (all_unif_prior) {
-    random_tab <- randomLHS(nb_simul, nparam)
+    random_tab <- randomLHS(nsims, nparam)
   }
 
   list_param = list(NULL)
-  for (i in 1:nb_simul) {
+  for (i in 1:nsims) {
     param = array(0, l)
     if (!all_unif_prior) {
       param <- .sample_prior(prior, prior_test)
@@ -438,15 +438,15 @@ abc_wave0 <- function(model,
     list_param[[i]] <- param
     tab_param <- rbind(tab_param, param[2:(l + 1)])
   }
-  seed_count <- seed_count + nb_simul
+  seed_count <- seed_count + nsims
 
   if (!is.null(batch)) {
-    simset <- batch_to_sims(n_cluster, batch, nb_simul)
+    simset <- batch_to_sims(ncores, batch, nsims)
     list_param <- list_param[simset]
     tab_param <- tab_param[simset, , drop = FALSE]
   }
 
-  cl <- makeCluster(n_cluster)
+  cl <- makeCluster(ncores)
   list_simul_summarystat <- parLapplyLB(cl, list_param, model)
   stopCluster(cl)
 
@@ -463,8 +463,8 @@ abc_waveN <- function(input, batch) {
 
   # Fixed
   model <- input$init$model
-  nb_simul <- input$init$nb_simul_step
-  n_cluster <- input$init$n_cluster
+  nsims <- input$init$nsims_step
+  ncores <- input$init$ncores
 
   # Current wave
   list_param <- input$cwave$list_param
@@ -472,18 +472,18 @@ abc_waveN <- function(input, batch) {
   k_acc <- input$cwave$k_acc
 
   if (!is.null(batch)) {
-    simset <- batch_to_sims(n_cluster, batch, nb_simul)
+    simset <- batch_to_sims(ncores, batch, nsims)
     list_param <- list_param[simset]
     tab_param <- tab_param[simset, , drop = FALSE]
   }
 
-  cl <- makeCluster(n_cluster)
+  cl <- makeCluster(ncores)
   list_simul_summarystat = parLapplyLB(cl, list_param, model)
   stopCluster(cl)
 
   tab_simul_summarystat <- do.call("rbind", list_simul_summarystat)
 
-  out <- list(cbind(tab_param, tab_simul_summarystat), nb_simul/k_acc)
+  out <- list(cbind(tab_param, tab_simul_summarystat), nsims/k_acc)
 
   return(out)
 }
@@ -501,7 +501,7 @@ merge_abc <- function(wave, indir = "data/", outdir = "data/") {
     for (i in 1:length(files)) {
       if (i == 1) {
         dat <- readRDS(files[i])
-        nBatches <- ceiling(dat$init$nb_simul/dat$init$n_cluster)
+        nBatches <- ceiling(dat$init$nsims/dat$init$ncores)
         if (length(files) < nBatches) return(NULL)
       } else {
         temp.dat <- readRDS(files[i])
@@ -514,7 +514,7 @@ merge_abc <- function(wave, indir = "data/", outdir = "data/") {
     for (i in 1:length(files)) {
       if (i == 1) {
         dat <- readRDS(files[i])
-        nBatches <- ceiling((dat$init$nb_simul - ceiling(dat$init$nb_simul * dat$init$alpha))/dat$init$n_cluster)
+        nBatches <- ceiling((dat$init$nsims - ceiling(dat$init$nsims * dat$init$alpha))/dat$init$ncores)
         if (length(files) < nBatches) return(NULL)
       } else {
         temp.dat <- readRDS(files[i])
