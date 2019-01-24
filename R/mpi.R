@@ -89,7 +89,7 @@ abc_smc_cluster <- function(model,
   if (!is.logical(verbose))
     stop("verbose must be boolean")
   if (!is.null(dist_weights) && length(dist_weights) != length(summary_stat_target)) {
-    stop("'dist_weights' must be the same length than 'summary_stat_target'")
+    stop("dist_weights must be the same length than summary_stat_target")
   }
 
   sequential <- abc_lenormand_cluster(model = model, prior = prior,
@@ -139,7 +139,7 @@ abc_lenormand_cluster <- function(model,
   nparam <- length(prior)
   nstat <- length(summary_stat_target)
   if (!.all_unif(prior)) {
-    stop("Prior distributions must be uniform to use the Lenormand et al. (2012)'s algorithm.")
+    stop("Prior distributions must be uniform to use the Lenormand algorithm.")
   }
   n_alpha <- ceiling(nsims * alpha)
 
