@@ -41,10 +41,8 @@ a <- abc_smc_cluster(model = myfunc,
                      nb_simul = 200,
                      summary_stat_target = prev.targ,
                      p_acc_min = 0.05,
-                     n_cluster = uni,
-                     use_seed = TRUE,
                      cl = cluster)
 save(a, file = "sisfit.rda")
 
 stopCluster(cluster)
-mpi.exit()
+# mpi.exit()

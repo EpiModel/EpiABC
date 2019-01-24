@@ -44,15 +44,15 @@ prev.targ <- 0.25
 
 prep <- abc_smc_prep(model = myfunc,
                      prior = priors,
-                     nb_simul = 500,
+                     nsims = 500,
                      summary_stat_target = prev.targ,
-                     n_cluster = 16,
+                     ncores = 16,
                      alpha = 0.2)
 prep
 saveRDS(prep, file = "data/abc.prep.rda")
 
 # Batches for Wave 0
-ceiling(prep$nb_simul/prep$n_cluster)
+ceiling(prep$nsims/prep$ncores)
 
 # Batches for Wave 1+
-ceiling((prep$nb_simul - ceiling(prep$nb_simul * prep$alpha))/prep$n_cluster)
+ceiling((prep$nsims - ceiling(prep$nsims * prep$alpha))/prep$ncores)

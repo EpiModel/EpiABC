@@ -23,10 +23,9 @@ toy_prior <- list(c("unif", 0, 1))
 fit <- abc_smc_cluster(model = toy_model_parallel,
                        prior = toy_prior,
                        summary_stat_target = sum_stat_obs,
-                       nb_simul = 200,
+                       nsims = 200,
                        alpha = 0.5,
                        p_acc_min = 0.45,
-                       n_cluster = uni,
                        cl = cluster)
 
 stopCluster(cluster)

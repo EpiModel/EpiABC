@@ -16,9 +16,9 @@ toy_prior <- list(c("unif",0,1))
 
 prep <- abc_smc_prep(model = toy_model_parallel,
                      prior = toy_prior,
-                     nb_simul = 500,
+                     nsims = 500,
                      summary_stat_target = sum_stat_obs,
-                     n_cluster = 4,
+                     ncores = 4,
                      alpha = 0.2,
                      p_acc_min = 0.1)
 prep
@@ -38,15 +38,15 @@ for (i in 1:20) {
 # interactive
 prep <- abc_smc_prep(model = toy_model_parallel,
                      prior = toy_prior,
-                     nb_simul = 100,
+                     nsims = 100,
                      summary_stat_target = sum_stat_obs,
-                     n_cluster = 8,
+                     ncores = 8,
                      alpha = 0.5,
                      p_acc_min = 0.1)
 prep
 
 # write bash script with this
-nBatches <- ceiling(prep$nb_simul/prep$n_cluster)
+nBatches <- ceiling(prep$nsims/prep$ncores)
 nBatches
 
 # Wave 0
@@ -58,7 +58,7 @@ merge_abc(wave = 0)
 abc_smc_process(wave = 0)
 
 # Wave 1
-nBatches <- ceiling(prep$alpha*prep$nb_simul/prep$n_cluster)
+nBatches <- ceiling(prep$alpha*prep$nsims/prep$ncores)
 
 for (batch in 1:nBatches) {
   abc_smc_wave(wave = 1, batch = batch)

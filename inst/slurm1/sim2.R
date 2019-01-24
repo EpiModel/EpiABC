@@ -31,9 +31,9 @@ prev.targ <- 0.25
 
 prep <- abc_smc_prep(model = myfunc,
                      prior = priors,
-                     nb_simul = 20,
+                     nsims = 20,
                      summary_stat_target = prev.targ,
-                     n_cluster = 4,
+                     ncores = 4,
                      alpha = 0.5,
                      p_acc_min = 0.1)
 prep

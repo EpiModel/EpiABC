@@ -2820,16 +2820,16 @@
 
 ###################### parallel functions ###############
 .ABC_rejection_internal_cluster <- function(model, prior, prior_test, nsims, seed_count = 0,
-    n_cluster = 1) {
-    cl <- makeCluster(getOption("cl.cores", n_cluster))
+    ncores = 1) {
+    cl <- makeCluster(getOption("cl.cores", ncores))
     tab_simul_summarystat = NULL
     tab_param = NULL
     list_param = list(NULL)
-    npar = floor(nsims/(100 * n_cluster))
-    n_end = nsims - (npar * 100 * n_cluster)
+    npar = floor(nsims/(100 * ncores))
+    n_end = nsims - (npar * 100 * ncores)
     if (npar > 0) {
         for (irun in 1:npar) {
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 l = length(prior)
                 param = .sample_prior(prior, prior_test)
                 # if (use_seed) # NB: we force the value use_seed=TRUE
@@ -2837,9 +2837,9 @@
                 list_param[[i]] = param
                 tab_param = rbind(tab_param, param[2:(l + 1)])
             }
-            seed_count = seed_count + 100 * n_cluster
+            seed_count = seed_count + 100 * ncores
             list_simul_summarystat = parLapplyLB(cl, list_param, model)
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
             }
         }
@@ -2868,25 +2868,25 @@
 }
 
 ## FUNCTION ABC_rejection: brute-force ABC (Pritchard et al. 1999)
-.ABC_rejection_cluster <- function(model, prior, prior_test, nsims, seed_count = 0,
-    n_cluster = 1, verbose) {
+.ABC_rejectioncores <- function(model, prior, prior_test, nsims, seed_count = 0,
+    ncores = 1, verbose) {
     if (verbose) {
         write.table(NULL, file = "output", row.names = F, col.names = F, quote = F)
     }
     # library(parallel)
     start = Sys.time()
     options(scipen = 50)
-    cl <- makeCluster(getOption("cl.cores", n_cluster))
+    cl <- makeCluster(getOption("cl.cores", ncores))
     tab_simul_summarystat = NULL
     tab_param = NULL
     list_param = list(NULL)
-    npar = floor(nsims/(100 * n_cluster))
-    n_end = nsims - (npar * 100 * n_cluster)
+    npar = floor(nsims/(100 * ncores))
+    n_end = nsims - (npar * 100 * ncores)
     if (npar > 0) {
         for (irun in 1:npar) {
             paramtemp = NULL
             simultemp = NULL
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 l = length(prior)
                 param = .sample_prior(prior, prior_test)
                 # if (use_seed) # NB: we force the value use_seed=TRUE
@@ -2895,9 +2895,9 @@
                 tab_param = rbind(tab_param, param[2:(l + 1)])
                 paramtemp = rbind(paramtemp, param[2:(l + 1)])
             }
-            seed_count = seed_count + n_cluster
+            seed_count = seed_count + ncores
             list_simul_summarystat = parLapplyLB(cl, list_param, model)
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
                 simultemp = rbind(simultemp, as.numeric(list_simul_summarystat[[i]]))
             }
@@ -2947,16 +2947,16 @@
 ## function to perform ABC simulations from a non-uniform prior (derived from a
 ## set of particles)
 .ABC_launcher_not_uniform_cluster <- function(model, prior, param_previous_step,
-    tab_weight, nsims, seed_count, inside_prior, n_cluster, max_pick=10000) {
+    tab_weight, nsims, seed_count, inside_prior, ncores, max_pick=10000) {
     tab_simul_summarystat = NULL
     tab_param = NULL
-    cl <- makeCluster(getOption("cl.cores", n_cluster))
+    cl <- makeCluster(getOption("cl.cores", ncores))
     list_param = list(NULL)
-    npar = floor(nsims/(100 * n_cluster))
-    n_end = nsims - (npar * 100 * n_cluster)
+    npar = floor(nsims/(100 * ncores))
+    n_end = nsims - (npar * 100 * ncores)
     if (npar > 0) {
         for (irun in 1:npar) {
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 l = dim(param_previous_step)[2]
                 if (!inside_prior) {
                   # pick a particle
@@ -2988,9 +2988,9 @@
                 list_param[[i]] = param
                 tab_param = rbind(tab_param, param[2:(l + 1)])
             }
-            seed_count = seed_count + 100 * n_cluster
+            seed_count = seed_count + 100 * ncores
             list_simul_summarystat = parLapplyLB(cl, list_param, model)
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
             }
         }
@@ -3045,13 +3045,13 @@
 ## function to perform ABC simulations from a non-uniform prior and with
 ## unidimensional jumps
 .ABC_launcher_not_uniform_uni_cluster <- function(model, prior, param_previous_step,
-    tab_weight, nsims, seed_count, inside_prior, n_cluster, max_pick=10000) {
+    tab_weight, nsims, seed_count, inside_prior, ncores, max_pick=10000) {
     tab_simul_summarystat = NULL
     tab_param = NULL
-    cl <- makeCluster(getOption("cl.cores", n_cluster))
+    cl <- makeCluster(getOption("cl.cores", ncores))
     list_param = list(NULL)
-    npar = floor(nsims/(100 * n_cluster))
-    n_end = nsims - (npar * 100 * n_cluster)
+    npar = floor(nsims/(100 * ncores))
+    n_end = nsims - (npar * 100 * ncores)
     l = dim(param_previous_step)[2]
     l_array = dim(param_previous_step)[2]
     if (is.null(l_array)) {
@@ -3064,7 +3064,7 @@
     }
     if (npar > 0) {
         for (irun in 1:npar) {
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 if (!inside_prior) {
                   # pick a particle
                   param_picked = .particle_pick(as.matrix(as.matrix(param_previous_step)),
@@ -3093,9 +3093,9 @@
                 list_param[[i]] = param
                 tab_param = rbind(tab_param, param[2:(l + 1)])
             }
-            seed_count = seed_count + 100 * n_cluster
+            seed_count = seed_count + 100 * ncores
             list_simul_summarystat = parLapplyLB(cl, list_param, model)
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
             }
         }
@@ -3146,7 +3146,7 @@
 
 ## PMC ABC algorithm: Beaumont et al. Biometrika 2009
 .ABC_PMC_cluster <- function(model, prior, prior_test, nsims, summary_stat_target,
-    n_cluster, verbose, dist_weights=NULL, seed_count = 0, inside_prior = TRUE, tolerance_tab = -1,
+    ncores, verbose, dist_weights=NULL, seed_count = 0, inside_prior = TRUE, tolerance_tab = -1,
     progress_bar = FALSE, max_pick=10000) {
     ## checking errors in the inputs
     if (!is.vector(seed_count))
@@ -3184,7 +3184,7 @@
         if (nsims_step > 1) {
             # classic ABC step
             tab_ini = .ABC_rejection_internal_cluster(model, prior, prior_test, nsims_step,
-                seed_count, n_cluster)
+                seed_count, ncores)
             if (nsims_step == nsims) {
                 sd_simul = sapply(as.data.frame(tab_ini[, (nparam + 1):(nparam +
                   nstat)]), sd)  # determination of the normalization constants in each dimension associated to each summary statistic, this normalization will not change during all the algorithm
@@ -3199,7 +3199,7 @@
             }
         } else {
             tab_ini = .ABC_rejection_internal_cluster(model, prior, prior_test, nsims_step,
-                seed_count, n_cluster)
+                seed_count, ncores)
             seed_count = seed_count + nsims_step
             if (.compute_dist(summary_stat_target, tab_ini[(nparam + 1):(nparam +
                 nstat)], sd_simul, dist_weights=dist_weights) < tolerance_tab[1]) {
@@ -3231,7 +3231,7 @@
                 # Sampling of parameters around the previous particles
                 tab_ini = .ABC_launcher_not_uniform_uni_cluster(model, prior, as.matrix(as.matrix(simul_below_tol)[,
                   1:nparam]), tab_weight, nsims_step, seed_count, inside_prior,
-                  n_cluster, max_pick)
+                  ncores, max_pick)
                 seed_count = seed_count + nsims_step
                 simul_below_tol2 = rbind(simul_below_tol2, .selec_simul(summary_stat_target,
                   as.matrix(as.matrix(tab_ini)[, 1:nparam]), as.matrix(as.matrix(tab_ini)[,
@@ -3242,7 +3242,7 @@
             } else {
                 tab_ini = .ABC_launcher_not_uniform_uni_cluster(model, prior, as.matrix(as.matrix(simul_below_tol)[,
                   1:nparam]), tab_weight, nsims_step, seed_count, inside_prior,
-                  n_cluster, max_pick)
+                  ncores, max_pick)
                 seed_count = seed_count + nsims_step
                 if (.compute_dist(summary_stat_target, tab_ini[(nparam + 1):(nparam +
                   nstat)], sd_simul, dist_weights=dist_weights) < tolerance_tab[it]) {
@@ -3298,20 +3298,20 @@
 }
 
 .move_drovandi_ini_cluster <- function(nsims_step, simul_below_tol, tab_weight,
-    nparam, nstat, prior, summary_stat_target, tol_next, dist_weights, seed_count, n_cluster, model,
+    nparam, nstat, prior, summary_stat_target, tol_next, dist_weights, seed_count, ncores, model,
     sd_simul, max_pick=10000) {
     i_acc = 0
     res = NULL
-    npar = floor(nsims_step/(100 * n_cluster))
-    n_end = nsims_step - (npar * 100 * n_cluster)
+    npar = floor(nsims_step/(100 * ncores))
+    n_end = nsims_step - (npar * 100 * ncores)
     l = length(prior)
     list_param = list(NULL)
-    cl <- makeCluster(getOption("cl.cores", n_cluster))
+    cl <- makeCluster(getOption("cl.cores", ncores))
     if (npar > 0) {
         for (irun in 1:npar) {
             tab_param = NULL
             tab_picked = NULL
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 # pick a particle
                 simul_picked = .particle_pick(simul_below_tol, tab_weight)
                 # move it
@@ -3324,10 +3324,10 @@
                 list_param[[i]] = param
                 tab_picked = rbind(tab_picked, as.numeric(simul_picked))
             }
-            seed_count = seed_count + n_cluster
+            seed_count = seed_count + ncores
             # perform simulations
             list_simul_summarystat = parLapplyLB(cl, list_param, model)
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 # check whether it is below tol_next and undo the move if it is not
                 new_simul = c(as.numeric(tab_param[i, ]), as.numeric(list_simul_summarystat[[i]]))
                 if (.compute_dist(summary_stat_target, as.numeric(new_simul[(nparam +
@@ -3382,21 +3382,21 @@
 }
 
 .move_drovandi_end_cluster <- function(nsims_step, new_particles, nparam, nstat,
-    prior, summary_stat_target, tol_next, dist_weights, seed_count, n_cluster, model, sd_simul, max_pick=10000) {
+    prior, summary_stat_target, tol_next, dist_weights, seed_count, ncores, model, sd_simul, max_pick=10000) {
     i_acc = 0
     res = NULL
-    npar = floor(nsims_step/(100 * n_cluster))
-    n_end = nsims_step - (npar * 100 * n_cluster)
+    npar = floor(nsims_step/(100 * ncores))
+    n_end = nsims_step - (npar * 100 * ncores)
     l = length(prior)
     list_param = list(NULL)
-    cl <- makeCluster(getOption("cl.cores", n_cluster))
+    cl <- makeCluster(getOption("cl.cores", ncores))
     if (npar > 0) {
         for (irun in 1:npar) {
             tab_param = NULL
             tab_picked = NULL
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 # pick a particle
-                simul_picked = new_particles[((irun - 1) * n_cluster + i), ]
+                simul_picked = new_particles[((irun - 1) * ncores + i), ]
                 # move it
                 param_moved = .move_particleb(simul_picked[1:nparam], 2 * var(as.matrix(as.matrix(as.matrix(new_particles)[,
                   1:nparam]))), prior, max_pick)
@@ -3407,10 +3407,10 @@
                 list_param[[i]] = param
                 tab_picked = rbind(tab_picked, as.numeric(simul_picked))
             }
-            seed_count = seed_count + 100 * n_cluster
+            seed_count = seed_count + 100 * ncores
             # perform simulations
             list_simul_summarystat = parLapplyLB(cl, list_param, model)
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 # check whether it is below tol_next and undo the move if it is not
                 new_simul = c(as.numeric(tab_param[i, ]), as.numeric(list_simul_summarystat[[i]]))
                 if (.compute_dist(summary_stat_target, as.numeric(new_simul[(nparam +
@@ -3431,7 +3431,7 @@
         tab_param = NULL
         for (i in 1:n_end) {
             # pick a particle
-            simul_picked = new_particles[(npar * n_cluster + i), ]
+            simul_picked = new_particles[(npar * ncores + i), ]
             # move it
             param_moved = .move_particleb(simul_picked[1:nparam], 2 * var(as.matrix(as.matrix(as.matrix(new_particles)[,
                 1:nparam]))), prior, max_pick)
@@ -3465,21 +3465,21 @@
 }
 
 .move_drovandi_diversify_cluster <- function(nsims_step, new_particles, nparam,
-    nstat, prior, summary_stat_target, tol_next, dist_weights, seed_count, n_cluster, model, sd_simul, max_pick=10000) {
+    nstat, prior, summary_stat_target, tol_next, dist_weights, seed_count, ncores, model, sd_simul, max_pick=10000) {
     i_acc = 0
     res = NULL
-    npar = floor(nsims_step/(100 * n_cluster))
-    n_end = nsims_step - (npar * 100 * n_cluster)
+    npar = floor(nsims_step/(100 * ncores))
+    n_end = nsims_step - (npar * 100 * ncores)
     l = length(prior)
     list_param = list(NULL)
-    cl <- makeCluster(getOption("cl.cores", n_cluster))
+    cl <- makeCluster(getOption("cl.cores", ncores))
     if (npar > 0) {
         for (irun in 1:npar) {
             tab_param = NULL
             tab_picked = NULL
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 # pick a particle
-                simul_picked = new_particles[((irun - 1) * n_cluster + i), ]
+                simul_picked = new_particles[((irun - 1) * ncores + i), ]
                 # move it
                 param_moved = .move_particleb(simul_picked[1:nparam], 2 * var(as.matrix(as.matrix(as.matrix(new_particles)[,
                   1:nparam]))), prior, max_pick)
@@ -3490,10 +3490,10 @@
                 list_param[[i]] = param
                 tab_picked = rbind(tab_picked, as.numeric(simul_picked))
             }
-            seed_count = seed_count + 100 * n_cluster
+            seed_count = seed_count + 100 * ncores
             # perform simulations
             list_simul_summarystat = parLapplyLB(cl, list_param, model)
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 # check whether it is below tol_next and undo the move if it is not
                 new_simul = c(as.numeric(tab_param[i, ]), as.numeric(list_simul_summarystat[[i]]))
                 if (.compute_dist(summary_stat_target, as.numeric(new_simul[(nparam +
@@ -3514,7 +3514,7 @@
         tab_param = NULL
         for (i in 1:n_end) {
             # pick a particle
-            simul_picked = new_particles[(npar * n_cluster + i), ]
+            simul_picked = new_particles[(npar * ncores + i), ]
             # move it
             param_moved = .move_particleb(simul_picked[1:nparam], 2 * var(as.matrix(as.matrix(as.matrix(new_particles)[,
                 1:nparam]))), prior, max_pick)
@@ -3550,7 +3550,7 @@
 ## sequential algorithm of Drovandi & Pettitt 2011 - the proposal used is a
 ## multivariate normal (cf paragraph 2.2 - p. 227 in Drovandi & Pettitt 2011)
 .ABC_Drovandi_cluster <- function(model, prior, prior_test, nsims, summary_stat_target,
-    n_cluster, verbose, dist_weights=NULL, seed_count = 0, tolerance_tab = -1, alpha = 0.5, c = 0.01,
+    ncores, verbose, dist_weights=NULL, seed_count = 0, tolerance_tab = -1, alpha = 0.5, c = 0.01,
     first_tolerance_level_auto = TRUE, progress_bar = FALSE, max_pick=10000) {
     ## checking errors in the inputs
     if (!is.vector(seed_count))
@@ -3603,7 +3603,7 @@
     if (first_tolerance_level_auto) {
         # classic ABC step
         tab_ini = .ABC_rejection_internal_cluster(model, prior, prior_test, nsims_step,
-            seed_count, n_cluster)
+            seed_count, ncores)
         sd_simul = sapply(as.data.frame(tab_ini[, (nparam + 1):(nparam + nstat)]),
             sd)  # determination of the normalization constants in each dimension associated to each summary statistic, this normalization will not change during all the algorithm
         seed_count = seed_count + nsims_step
@@ -3618,7 +3618,7 @@
             if (nsims_step > 1) {
                 # classic ABC step
                 tab_ini = .ABC_rejection_internal_cluster(model, prior, prior_test,
-                  nsims_step, seed_count, n_cluster)
+                  nsims_step, seed_count, ncores)
                 if (nsims_step == nsims) {
                   sd_simul = sapply(as.data.frame(tab_ini[, (nparam + 1):(nparam +
                     nstat)]), sd)  # determination of the normalization constants in each dimension associated to each summary statistic, this normalization will not change during all the algorithm
@@ -3633,7 +3633,7 @@
                 }
             } else {
                 tab_ini = .ABC_rejection_internal_cluster(model, prior, prior_test,
-                  nsims_step, seed_count, n_cluster)
+                  nsims_step, seed_count, ncores)
                 seed_count = seed_count + nsims_step
                 if (.compute_dist(summary_stat_target, tab_ini[(nparam + 1):(nparam +
                   nstat)], sd_simul, dist_weights=dist_weights) <= tolerance_tab[1]) {
@@ -3685,14 +3685,14 @@
         }
         md = .move_drovandi_ini_cluster(nsims_step, simul_below_tol, tab_weight[1:(nsims -
             n_alpha)], nparam, nstat, prior, summary_stat_target, tol_next, dist_weights, seed_count,
-            n_cluster, model, sd_simul, max_pick)
+            ncores, model, sd_simul, max_pick)
         new_particles = md[[1]]
         i_acc = i_acc + md[[2]]
         seed_count = seed_count + nsims_step
         if (R > 1) {
             for (j in 2:R) {
                 md = .move_drovandi_end_cluster(nsims_step, new_particles, nparam,
-                  nstat, prior, summary_stat_target, tol_next, dist_weights, seed_count, n_cluster,
+                  nstat, prior, summary_stat_target, tol_next, dist_weights, seed_count, ncores,
                   model, sd_simul, max_pick)
                 new_particles = md[[1]]
                 i_acc = i_acc + md[[2]]
@@ -3743,7 +3743,7 @@
     simul_below_tol2 = NULL
     for (j in 1:R) {
         simul_below_tol = .move_drovandi_diversify_cluster(nsims, simul_below_tol,
-            nparam, nstat, prior, summary_stat_target, tol_next, dist_weights, seed_count, n_cluster,
+            nparam, nstat, prior, summary_stat_target, tol_next, dist_weights, seed_count, ncores,
             model, sd_simul, max_pick)
         seed_count = seed_count + nsims
     }
@@ -3770,19 +3770,19 @@
 
 ## rejection algorithm with M simulations per parameter set
 .ABC_rejection_M_cluster <- function(model, prior, prior_test, nsims, M, seed_count,
-    n_cluster) {
+    ncores) {
     tab_simul_summarystat = NULL
     tab_param = NULL
     list_param = list(NULL)
-    npar = floor(nsims * M/(100 * n_cluster))
-    n_end = nsims * M - (npar * 100 * n_cluster)
-    cl <- makeCluster(getOption("cl.cores", n_cluster))
+    npar = floor(nsims * M/(100 * ncores))
+    n_end = nsims * M - (npar * 100 * ncores)
+    cl <- makeCluster(getOption("cl.cores", ncores))
     l = length(prior)
     param2 = array(0, (l + 1))
     if (npar > 0) {
         for (irun in 1:npar) {
-            for (irun2 in 1:(100 * n_cluster)) {
-                ii = (100 * n_cluster * (irun - 1) + irun2)%%M
+            for (irun2 in 1:(100 * ncores)) {
+                ii = (100 * ncores * (irun - 1) + irun2)%%M
                 if ((ii == 1) || (M == 1)) {
                   param = .sample_prior(prior, prior_test)
                   param2 = c((seed_count + 1), param)
@@ -3795,7 +3795,7 @@
                 tab_param = rbind(tab_param, param2[2:(l + 1)])
             }
             list_simul_summarystat = parLapplyLB(cl, list_param, model)
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
             }
         }
@@ -3803,7 +3803,7 @@
     if (n_end > 0) {
         list_param = list(NULL)
         for (irun2 in 1:n_end) {
-            ii = (100 * n_cluster * npar + irun2)%%M
+            ii = (100 * ncores * npar + irun2)%%M
             if ((ii == 1) || (M == 1)) {
                 param = .sample_prior(prior, prior_test)
                 param2 = c((seed_count + 1), param)
@@ -3827,7 +3827,7 @@
 ## sequential algorithm of Del Moral et al. 2012 - the proposal used is a normal
 ## in each dimension (cf paragraph 3.2 in Del Moral et al. 2012)
 .ABC_Delmoral_cluster <- function(model, prior, prior_test, nsims, summary_stat_target,
-    n_cluster, verbose, alpha = 0.9, M = 1, nb_threshold = floor(nsims/2), tolerance_target = -1,
+    ncores, verbose, alpha = 0.9, M = 1, nb_threshold = floor(nsims/2), tolerance_target = -1,
     dist_weights=NULL, seed_count = 0, progress_bar = FALSE, max_pick=10000) {
     ## checking errors in the inputs
     if (!is.vector(alpha))
@@ -3874,7 +3874,7 @@
     nstat = length(summary_stat_target)
     # step 1 classic ABC step
     simul_below_tol = .ABC_rejection_M_cluster(model, prior, prior_test, nsims,
-        M, seed_count, n_cluster)
+        M, seed_count, ncores)
     seed_count = seed_count + M * nsims
     tab_weight = rep(1/nsims, nsims)
     ESS = nsims
@@ -3907,7 +3907,7 @@
     # following steps
     kstep = 1
     l = length(prior)
-    cl <- makeCluster(getOption("cl.cores", n_cluster))
+    cl <- makeCluster(getOption("cl.cores", ncores))
     while (new_tolerance > tolerance_target) {
         kstep = kstep + 1
         # determination of the new tolerance
@@ -3959,8 +3959,8 @@
             particles = as.matrix(simul_below_tol[, 1:nparam])
         }
         # MCMC move
-        npar = floor(nsims * M/(100 * n_cluster))
-        n_end = nsims * M - (npar * 100 * n_cluster)
+        npar = floor(nsims * M/(100 * ncores))
+        n_end = nsims * M - (npar * 100 * ncores)
         covmat = 2 * cov.wt(as.matrix(as.matrix(particles[uu, ])[tab_weight > 0,
             ]), as.vector(tab_weight[tab_weight > 0]))$cov
         l_array = dim(particles)[2]
@@ -3980,9 +3980,9 @@
             for (irun in 1:npar) {
                 list_param = list(NULL)
                 ic = 1
-                for (irun2 in 1:(100 * n_cluster)) {
-                  ii = (100 * n_cluster * (irun - 1) + irun2)%%M
-                  ii2 = ceiling((100 * n_cluster * (irun - 1) + irun2)/M)
+                for (irun2 in 1:(100 * ncores)) {
+                  ii = (100 * ncores * (irun - 1) + irun2)%%M
+                  ii2 = ceiling((100 * ncores * (irun - 1) + irun2)/M)
                   if (tab_weight[ii2] > 0) {
                     if ((ii == 1) || (M == 1)) {
                       param_moved = .move_particleb_uni(as.numeric(particles[(ii2 *
@@ -4011,8 +4011,8 @@
             list_param = list(NULL)
             ic = 1
             for (irun2 in 1:n_end) {
-                ii = (100 * n_cluster * npar + irun2)%%M
-                ii2 = ceiling((100 * n_cluster * npar + irun2)/M)
+                ii = (100 * ncores * npar + irun2)%%M
+                ii2 = ceiling((100 * ncores * npar + irun2)/M)
                 if (tab_weight[ii2] > 0) {
                   if ((ii == 1) || (M == 1)) {
                     param_moved = .move_particleb_uni(as.numeric(particles[(ii2 *
@@ -4143,14 +4143,14 @@
 ## function to perform ABC simulations from a non-uniform prior and with
 ## unidimensional jumps
 .ABC_launcher_not_uniformc_uni_cluster <- function(model, prior, param_previous_step,
-    tab_weight, nsims, seed_count, inside_prior, n_cluster, cl, max_pick=10000) {
+    tab_weight, nsims, seed_count, inside_prior, ncores, cl, max_pick=10000) {
     tab_simul_summarystat = NULL
     tab_param = NULL
     k_acc = 0
-    # cl <- makeCluster(getOption("cl.cores", n_cluster))
+    # cl <- makeCluster(getOption("cl.cores", ncores))
     list_param = list(NULL)
-    npar = floor(nsims/(100 * n_cluster))
-    n_end = nsims - (npar * 100 * n_cluster)
+    npar = floor(nsims/(100 * ncores))
+    n_end = nsims - (npar * 100 * ncores)
     l = dim(param_previous_step)[2]
     l_array = dim(param_previous_step)[2]
     if (is.null(l_array)) {
@@ -4163,7 +4163,7 @@
     }
     if (npar > 0) {
         for (irun in 1:npar) {
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 if (!inside_prior) {
                   k_acc = k_acc + 1
                   # pick a particle
@@ -4195,9 +4195,9 @@
                 list_param[[i]] = param
                 tab_param = rbind(tab_param, param[2:(l + 1)])
             }
-            seed_count = seed_count + 100 * n_cluster
+            seed_count = seed_count + 100 * ncores
             list_simul_summarystat = parLapplyLB(cl, list_param, model)
-            for (i in 1:(100 * n_cluster)) {
+            for (i in 1:(100 * ncores)) {
                 tab_simul_summarystat = rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
             }
         }
@@ -4253,7 +4253,7 @@
 ## ABC-MCMC algorithm of Marjoram et al. 2003 with automatic determination of the
 ## tolerance and proposal range following Wegmann et al. 2009
 .ABC_MCMC2_cluster <- function(model, prior, prior_test, n_obs, n_between_sampling,
-    summary_stat_target, n_cluster, verbose, n_calibration = 10000, tolerance_quantile = 0.01,
+    summary_stat_target, ncores, verbose, n_calibration = 10000, tolerance_quantile = 0.01,
     proposal_phi = 1, dist_weights=NULL, seed_count = 0, max_pick=100000) {
     ## checking errors in the inputs
     if (!is.vector(n_calibration))
@@ -4295,7 +4295,7 @@
     tab_param = NULL
     # initial draw of a particle
     initial = .ABC_rejection_internal_cluster(model, prior, prior_test, n_calibration,
-        seed_count, n_cluster)
+        seed_count, ncores)
     seed_count = seed_count + n_calibration
     tab_param = as.matrix(as.matrix(initial)[, 1:nparam])
     tab_simul_summary_stat = as.matrix(initial[, (nparam + 1):(nparam + nstat)])
@@ -4383,7 +4383,7 @@
 ## manual of ABCtoolbox (figure 9) - NB: for consistency with ABCtoolbox, AM11-12
 ## are not implemented in the algorithm
 .ABC_MCMC3_cluster <- function(model, prior, prior_test, n_obs, n_between_sampling,
-    summary_stat_target, n_cluster, verbose, n_calibration = 10000, tolerance_quantile = 0.01,
+    summary_stat_target, ncores, verbose, n_calibration = 10000, tolerance_quantile = 0.01,
     proposal_phi = 1, numcomp = 0, dist_weights=NULL, seed_count = 0, max_pick=100000) {
     ## checking errors in the inputs
     if (!is.vector(n_calibration))
@@ -4444,7 +4444,7 @@
     }
     # initial draw of a particle
     initial = .ABC_rejection_internal_cluster(model, prior, prior_test, nsims = n_calibration,
-        seed_count, n_cluster)
+        seed_count, ncores)
     seed_count = seed_count + n_calibration
     tab_param = as.matrix(as.matrix(initial)[, 1:nparam])
     tab_simul_summary_stat = as.matrix(initial[, (nparam + 1):(nparam + nstat)])
@@ -4611,7 +4611,7 @@
 ## FUNCTION ABC_mcmc: ABC coupled to MCMC (Marjoram et al. 2003, Wegmann et al.
 ## 2009)
 .ABC_mcmc_cluster <- function(method, model, prior, prior_test, n_obs, n_between_sampling,
-    summary_stat_target, n_cluster = 1, use_seed, verbose, dist_weights=NULL, ...) {
+    summary_stat_target, ncores = 1, use_seed, verbose, dist_weights=NULL, ...) {
     if (use_seed == FALSE) {
         stop("For parallel implementations, you must specify the option 'use_seed=TRUE'
              and modify your model accordingly - see the package's vignette for more details.")
@@ -4620,9 +4620,9 @@
     # library(parallel) Note that we do not consider the original Marjoram's
     # algortithm, which is not prone to parallel computing. (no calibration step)
     return(switch(EXPR = method, Marjoram = .ABC_MCMC2_cluster(model, prior, prior_test,
-        n_obs, n_between_sampling, summary_stat_target, n_cluster, verbose, dist_weights=dist_weights, ...),
+        n_obs, n_between_sampling, summary_stat_target, ncores, verbose, dist_weights=dist_weights, ...),
         Wegmann = .ABC_MCMC3_cluster(model, prior, prior_test, n_obs, n_between_sampling,
-            summary_stat_target, n_cluster, verbose, dist_weights=dist_weights, ...)))
+            summary_stat_target, ncores, verbose, dist_weights=dist_weights, ...)))
     options(scipen = 0)
 }
 
