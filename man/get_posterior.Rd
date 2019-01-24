@@ -11,7 +11,7 @@ get_posterior(wave, input = "data/")
 be read from that directory.}
 
 \item{input}{Either a character string with the directory to read the wave
-files created with \code{\link{abc_smc_wave }}from, or the direct object
+files created with \code{\link{abc_smc_wave}} from, or the direct object
 itself.}
 }
 \description{

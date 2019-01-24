@@ -396,7 +396,7 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
 #' @param wave If \code{input} is a character string, the wave file that should
 #'        be read from that directory.
 #' @param input Either a character string with the directory to read the wave
-#'        files created with \code{\link{abc_smc_wave }}from, or the direct object
+#'        files created with \code{\link{abc_smc_wave}} from, or the direct object
 #'        itself.
 #'
 #' @export
@@ -437,22 +437,23 @@ get_posterior <- function(wave, input = "data/") {
 
 #' Numerical Summary of Posterior Distribution of Parameters and Summary Statistics
 #'
-#' @param input Output from \code{\link{get_posterior}}.
+#' @param object Output from \code{\link{get_posterior}}.
+#' @param ... Additional arguments based to generic \code{summary}.
 #'
 #' @method summary abcsmc
 #' @export
 #'
-summary.abcsmc <- function(input) {
+summary.abcsmc <- function(object, ...) {
 
-  cat("Wave:", input$wave)
-  cat("\np_acc:", input$p_acc)
+  cat("Wave:", object$wave)
+  cat("\np_acc:", object$p_acc)
 
-  paramSumm <- apply(input$param, 2, summary)
+  paramSumm <- apply(object$param, 2, summary)
   colnames(paramSumm) <- rep("", ncol(paramSumm))
-  statsSumm <- apply(input$stats, 2, summary)
+  statsSumm <- apply(object$stats, 2, summary)
   colnames(statsSumm) <- rep("", ncol(statsSumm))
 
-  cat("\n\nTarget Stats: \n", input$target)
+  cat("\n\nTarget Stats: \n", object$target)
   cat("\nSimulated Targets")
   cat("\n-----------------")
   print(statsSumm)

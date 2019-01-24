@@ -4,10 +4,12 @@
 \alias{summary.abcsmc}
 \title{Numerical Summary of Posterior Distribution of Parameters and Summary Statistics}
 \usage{
-\method{summary}{abcsmc}(input)
+\method{summary}{abcsmc}(object, ...)
 }
 \arguments{
-\item{input}{Output from \code{\link{get_posterior}}.}
+\item{object}{Output from \code{\link{get_posterior}}.}
+
+\item{...}{Additional arguments based to generic \code{summary}.}
 }
 \description{
 Numerical Summary of Posterior Distribution of Parameters and Summary Statistics
