@@ -11,8 +11,8 @@
 #' @param prior a list of prior information. Each element of the list
 #'        corresponds to a model parameter. The list element must be a vector
 #'        whose first argument determines the type of prior distribution.
-#' @param nb_simul the number of simulations below the tolerance threshold is
-#'        equal to \code{nb_simul * alpha}.
+#' @param nsims the number of simulations below the tolerance threshold is
+#'        equal to \code{nsims * alpha}.
 #' @param summary_stat_target a vector containing the targeted (observed)
 #'        summary statistics.
 #' @param prior_test a string expressing the constraints between model
@@ -21,9 +21,6 @@
 #'        \ldots{}. Each parameter should be designated with \code{"X1"}, \code{"X2"},
 #'        \ldots{} in the same order as in the prior definition. If not provided,
 #'        no constraint will be applied.
-#' @param n_cluster a positive integer. If larger than 1 (the default value),
-#'        \code{ABC_sequential} will launch \code{model} simulations in parallel on
-#'        \code{n_cluster} cores of the computer.
 #' @param verbose If \code{TRUE}, \code{ABC_sequential} writes in the current
 #'        directory intermediary results at the end of each step of the algorithm
 #'        various files.
@@ -58,10 +55,9 @@
 #'
 abc_smc_cluster <- function(model,
                             prior,
-                            nb_simul,
+                            nsims,
                             summary_stat_target,
                             prior_test = NULL,
-                            n_cluster = 1,
                             verbose = FALSE,
                             dist_weights = NULL,
                             cl,
@@ -81,41 +77,36 @@ abc_smc_cluster <- function(model,
   prior <- .process_prior(prior)
   if (!is.null(prior_test))
     .check_prior_test(length(prior), prior_test)
-  if (missing(nb_simul))
-    stop("nb_simul is missing")
+  if (missing(nsims))
+    stop("nsims is missing")
   if (missing(summary_stat_target))
     stop("summary_stat_target is missing")
-  if (!is.vector(nb_simul) || length(nb_simul) > 1 || nb_simul < 1)
-    stop("nb_simul must be a number larger than 1.")
-  nb_simul <- floor(nb_simul)
+  if (!is.vector(nsims) || length(nsims) > 1 || nsims < 1)
+    stop("nsims must be a number larger than 1.")
+  nsims <- floor(nsims)
   if (!is.vector(summary_stat_target))
-    stop("'summary_stat_target' has to be a vector.")
-  if (!is.vector(n_cluster) || length(n_cluster) > 1 || n_cluster < 1)
-    stop("'n_cluster' has to be a positive number.")
-  n_cluster <- floor(n_cluster)
+    stop("summary_stat_target has to be a vector.")
   if (!is.logical(verbose))
     stop("verbose has to be boolean")
   if (!is.null(dist_weights) && length(dist_weights) != length(summary_stat_target)) {
     stop("'dist_weights' has to be the same length than 'summary_stat_target'")
   }
 
-  if (n_cluster == 1) {
-    stop("This version of ABC-SMC designed for multi-core, set n_cluster > 1")
-  } else {
-    sequential <- abc_lenormand_cluster(model = model, prior = prior, prior_test = prior_test,
-                                        nb_simul = nb_simul, summary_stat_target = summary_stat_target,
-                                        n_cluster = n_cluster, verbose = verbose,
-                                        dist_weights = dist_weights, cl = cl, ...)
-  }
+  sequential <- abc_lenormand_cluster(model = model, prior = prior,
+                                      prior_test = prior_test,
+                                      nsims = nsims,
+                                      summary_stat_target = summary_stat_target,
+                                      verbose = verbose,
+                                      dist_weights = dist_weights, cl = cl, ...)
+
   return(sequential)
 }
 
 abc_lenormand_cluster <- function(model,
                                   prior,
                                   prior_test,
-                                  nb_simul,
+                                  nsims,
                                   summary_stat_target,
-                                  n_cluster,
                                   verbose,
                                   alpha = 0.5,
                                   p_acc_min = 0.05,
@@ -150,19 +141,18 @@ abc_lenormand_cluster <- function(model,
   if (!.all_unif(prior)) {
     stop("Prior distributions must be uniform to use the Lenormand et al. (2012)'s algorithm.")
   }
-  n_alpha <- ceiling(nb_simul * alpha)
+  n_alpha <- ceiling(nsims * alpha)
 
   ## step 1 ABC rejection step with LHS
   tab_ini <- abc_rejection_lhs_cluster(model,
                                        prior,
                                        prior_test,
-                                       nb_simul,
+                                       nsims,
                                        seed_count,
-                                       n_cluster,
                                        cl)
   # initially, weights are equal
   tab_weight <- array(1, n_alpha)
-  seed_count <- seed_count + nb_simul
+  seed_count <- seed_count + nsims
   # determination of the normalization constants in each dimension associated to
   # each summary statistic, this normalization will not change during all the
   # algorithm
@@ -191,7 +181,7 @@ abc_lenormand_cluster <- function(model,
 
   ## following steps
   p_acc <- p_acc_min + 1
-  nb_simul_step <- nb_simul - n_alpha
+  nsims_step <- nsims - n_alpha
   it <- 1
 
   while (p_acc > p_acc_min) {
@@ -202,16 +192,15 @@ abc_lenormand_cluster <- function(model,
                                                   prior = prior,
                                                   param_previous_step = param_previous_step,
                                                   tab_weight = tab_weight/sum(tab_weight),
-                                                  nb_simul = nb_simul_step,
+                                                  nsims = nsims_step,
                                                   seed_count = seed_count,
                                                   inside_prior = inside_prior,
-                                                  n_cluster = n_cluster,
                                                   cl = cl,
                                                   max_pick = max_pick)
     tab_ini <- as.matrix(tab_inic[[1]])
     tab_ini <- as.numeric(tab_ini)
-    dim(tab_ini) <- c(nb_simul_step, (nparam + nstat))
-    seed_count <- seed_count + nb_simul_step
+    dim(tab_ini) <- c(nsims_step, (nparam + nstat))
+    seed_count <- seed_count + nsims_step
     if (!inside_prior) {
       tab_weight2 <- .compute_weightb(as.matrix(as.matrix(as.matrix(tab_ini)[, 1:nparam])),
                                       as.matrix(as.matrix(as.matrix(simul_below_tol)[, 1:nparam])),
@@ -229,7 +218,7 @@ abc_lenormand_cluster <- function(model,
     if (!is.null(dist_weights)) {
       tab_dist2 <- tab_dist2 * (dist_weights/sum(dist_weights))
     }
-    p_acc <- length(tab_dist2[!is.na(tab_dist2) & tab_dist2 <= tol_next])/nb_simul_step
+    p_acc <- length(tab_dist2[!is.na(tab_dist2) & tab_dist2 <= tol_next])/nsims_step
     tab_dist <- c(tab_dist, tab_dist2)
     tol_next <- sort(tab_dist)[n_alpha]
     simul_below_tol2 <- simul_below_tol2[!is.na(tab_dist) & tab_dist <= tol_next, ]
@@ -267,25 +256,24 @@ abc_lenormand_cluster <- function(model,
 abc_rejection_lhs_cluster <- function(model,
                                       prior,
                                       prior_test,
-                                      nb_simul,
+                                      nsims,
                                       seed_count,
-                                      n_cluster,
                                       cl) {
 
   tab_simul_summarystat <- NULL
   tab_param <- NULL
   list_param <- list(NULL)
-  # n_end <- nb_simul
+  # n_end <- nsims
   nparam <- length(prior)
   l <- length(prior)
   random_tab <- NULL
   all_unif_prior <- .all_unif(prior)
   if (all_unif_prior) {
-    random_tab <- randomLHS(nb_simul, nparam)
+    random_tab <- randomLHS(nsims, nparam)
   }
 
   list_param <- list(NULL)
-  for (i in 1:nb_simul) {
+  for (i in 1:nsims) {
     param <- array(0, l)
     if (!all_unif_prior) {
       param <- .sample_prior(prior, prior_test)
@@ -300,9 +288,9 @@ abc_rejection_lhs_cluster <- function(model,
     list_param[[i]] <- param
     tab_param <- rbind(tab_param, param[2:(l + 1)])
   }
-  seed_count <- seed_count + nb_simul
+  seed_count <- seed_count + nsims
   list_simul_summarystat <- parLapplyLB(cl, list_param, model)
-  for (i in 1:nb_simul) {
+  for (i in 1:nsims) {
     tab_simul_summarystat <- rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
   }
 
@@ -315,10 +303,9 @@ abc_launcher_not_uniformc_cluster <- function(model,
                                               prior,
                                               param_previous_step,
                                               tab_weight,
-                                              nb_simul,
+                                              nsims,
                                               seed_count,
                                               inside_prior,
-                                              n_cluster,
                                               cl,
                                               max_pick = 10000) {
   tab_simul_summarystat <- NULL
@@ -327,7 +314,7 @@ abc_launcher_not_uniformc_cluster <- function(model,
   list_param <- list(NULL)
 
   list_param <- list(NULL)
-  for (i in 1:nb_simul) {
+  for (i in 1:nsims) {
     l <- dim(param_previous_step)[2]
     counter <- 0
     repeat {
@@ -354,12 +341,12 @@ abc_launcher_not_uniformc_cluster <- function(model,
     list_param[[i]] <- param
     tab_param <- rbind(tab_param, param[2:(l + 1)])
   }
-  seed_count <- seed_count + nb_simul
+  seed_count <- seed_count + nsims
   list_simul_summarystat <- parLapplyLB(cl, list_param, model)
-  for (i in 1:nb_simul) {
+  for (i in 1:nsims) {
     tab_simul_summarystat <- rbind(tab_simul_summarystat, as.numeric(list_simul_summarystat[[i]]))
   }
 
-  out <- list(cbind(tab_param, tab_simul_summarystat), nb_simul/k_acc)
+  out <- list(cbind(tab_param, tab_simul_summarystat), nsims/k_acc)
   return(out)
 }

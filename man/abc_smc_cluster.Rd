@@ -5,9 +5,8 @@
 \title{Approximate Bayesian Computation with Sequential Monte Carlo Sampling on
 High-Performance Computing Clusters}
 \usage{
-abc_smc_cluster(model, prior, nb_simul, summary_stat_target,
-  prior_test = NULL, n_cluster = 1, verbose = FALSE,
-  dist_weights = NULL, cl, ...)
+abc_smc_cluster(model, prior, nsims, summary_stat_target,
+  prior_test = NULL, verbose = FALSE, dist_weights = NULL, cl, ...)
 }
 \arguments{
 \item{model}{a \code{R} function implementing the model to be simulated. It
@@ -18,8 +17,8 @@ must return a vector of summary statistics.}
 corresponds to a model parameter. The list element must be a vector
 whose first argument determines the type of prior distribution.}
 
-\item{nb_simul}{the number of simulations below the tolerance threshold is
-equal to \code{nb_simul * alpha}.}
+\item{nsims}{the number of simulations below the tolerance threshold is
+equal to \code{nsims * alpha}.}
 
 \item{summary_stat_target}{a vector containing the targeted (observed)
 summary statistics.}
@@ -30,10 +29,6 @@ you can use all the logical operators including \code{"<"}, \code{">"},
 \ldots{}. Each parameter should be designated with \code{"X1"}, \code{"X2"},
 \ldots{} in the same order as in the prior definition. If not provided,
 no constraint will be applied.}
-
-\item{n_cluster}{a positive integer. If larger than 1 (the default value),
-\code{ABC_sequential} will launch \code{model} simulations in parallel on
-\code{n_cluster} cores of the computer.}
 
 \item{verbose}{If \code{TRUE}, \code{ABC_sequential} writes in the current
 directory intermediary results at the end of each step of the algorithm
