@@ -1,5 +1,15 @@
 
+#' ABC-SMC Slurm Model Preparation
+#'
+#' This is the first step in the ABC-SMC Slurm workflow.
+#'
+#' @inheritParams abc_smc_cluster
+#'
+#' @param ncores Number of cores per node (defines a batch size).
+#' @param alpha Number of simulations to retain in waves 1+.
+#'
 #' @export
+#'
 abc_smc_prep <- function(model,
                          prior,
                          nsims,
@@ -53,8 +63,32 @@ abc_smc_prep <- function(model,
 }
 
 
+#' Simulates the ABC-SMC Slurm Model
+#'
+#' This is the second step in the ABC-SMC Slurm workflow.
+#'
+#' @param input A character string containing the directory of the output file
+#'        from \code{\link{abc_smc_prep}} which should be saved as an RDS file
+#'        with the name \code{abc.wave0.rda} (the default), or the object itself.
+#' @param wave SMC wave number, where the initial wave = 0. In the standard Slurm
+#'        workflow, this would get passed in as an environmental variable
+#'        \code{wave} from the master bash script.
+#' @param batch Batch number for the simulation set, which corresponds to the
+#'        array number passed in as an environmental Slurm variable
+#'        \code{SLURM_ARRAY_TASK_ID}.
+#' @param save If \code{TRUE}, writes output to an RDS file with the name
+#'        \code{abc.waveX.batchY.rda} in the directory specified by \code{outdir},
+#'        where \code{X} is the value of \code{wave} and \code{Y} is the value
+#'        of \code{batch}.
+#' @param outdir Path to save the output RDS file if \code{save=TRUE}.
+#'
 #' @export
-abc_smc_wave <- function(input = "data/", wave, batch, save = TRUE, outdir = "data/") {
+#'
+abc_smc_wave <- function(input = "data/",
+                         wave,
+                         batch,
+                         save = TRUE,
+                         outdir = "data/") {
 
   if (class(input) == "character") {
     file <- list.files(input, pattern = paste0("wave", wave - 1, ".rda"), full.names = TRUE)
@@ -114,7 +148,15 @@ abc_smc_wave <- function(input = "data/", wave, batch, save = TRUE, outdir = "da
   }
 }
 
+
+#' Processes ABC-SMC Slurm Simulation Output and Selects Next Wave Particles
+#'
+#' This is the fourth step in the ABC-SMC Slurm workflow.
+#'
+#' @inheritParams abc_smc_wave
+#'
 #' @export
+#'
 abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/") {
 
   if (class(input) == "character") {
@@ -167,7 +209,7 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
     tol_next <- max(tab_dist)
 
 
-    # particle selection for wave 1 -------------------------------------------
+    ## particle selection for wave 1
 
     param_previous_step <- as.matrix(as.matrix(simul_below_tol)[, 1:nparam])
     tab_weight <- tab_weight/sum(tab_weight)
@@ -291,7 +333,7 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
     tab_dist <- tab_dist_new[1:n_alpha]
 
 
-    # particle selection for wave N+1 -------------------------------------------
+    ## particle selection for wave N+1
 
     param_previous_step = as.matrix(as.matrix(simul_below_tol)[, 1:nparam])
     tab_weight = tab_weight/sum(tab_weight)
@@ -346,8 +388,20 @@ abc_smc_process <- function(input = "data/", wave, save = TRUE, outdir = "data/"
 }
 
 
+#' Extracts Posterior Distribution for Parameters and Summary Statistics
+#'
+#' Once a simulation wave is complete, this function processes the output and
+#' stores it in a format that is useful for numerical analysis and plotting.
+#'
+#' @param wave If \code{input} is a character string, the wave file that should
+#'        be read from that directory.
+#' @param input Either a character string with the directory to read the wave
+#'        files created with \code{\link{abc_smc_wave }}from, or the direct object
+#'        itself.
+#'
 #' @export
-out_abc <- function(wave, input = "data/") {
+#'
+get_posterior <- function(wave, input = "data/") {
 
   if (class(input) == "character") {
     file <- list.files(input, pattern = paste0("wave", wave, ".rda"), full.names = TRUE)
@@ -367,21 +421,28 @@ out_abc <- function(wave, input = "data/") {
   sd_simul <- input$pwave$sd_simul
   p_acc <- input$pwave$p_acc
 
-  final_res <- list(param = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
-                    stats = as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
-                    target = summary_stat_target,
-                    weights = tab_weight/sum(tab_weight), stats_normalization = as.numeric(sd_simul),
-                    epsilon = max(.compute_dist(summary_stat_target,
-                                                as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
-                                                sd_simul, dist_weights = dist_weights)),
-                    wave = wave, p_acc = p_acc)
+  out <- list(param = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
+              stats = as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
+              target = summary_stat_target,
+              weights = tab_weight/sum(tab_weight), stats_normalization = as.numeric(sd_simul),
+              epsilon = max(.compute_dist(summary_stat_target,
+                                          as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
+                                          sd_simul, dist_weights = dist_weights)),
+              wave = wave, p_acc = p_acc)
 
-  return(final_res)
-
+  class(out) <- "abcsmc"
+  return(out)
 }
 
+
+#' Numerical Summary of Posterior Distribution of Parameters and Summary Statistics
+#'
+#' @param input Output from \code{\link{get_posterior}}.
+#'
+#' @method summary abcsmc
 #' @export
-summary_abc <- function(input) {
+#'
+summary.abcsmc <- function(input) {
 
   cat("Wave:", input$wave)
   cat("\np_acc:", input$p_acc)
@@ -403,7 +464,6 @@ summary_abc <- function(input) {
 }
 
 
-#' @export
 abc_wave0 <- function(model,
                       prior,
                       prior_test,
@@ -458,7 +518,7 @@ abc_wave0 <- function(model,
   return(out)
 }
 
-#' @export
+
 abc_waveN <- function(input, batch) {
 
   # Fixed
@@ -492,7 +552,17 @@ batch_to_sims <- function(batchSize, batchNum, totSims) {
   ((batchSize*batchNum) - (batchSize - 1)):(min(batchSize*batchNum, totSims))
 }
 
+
+#' Combines Individual Batch Simulation Files for Processing in Next Wave
+#'
+#' This is the third step in the ABC-SMC Slurm workflow.
+#'
+#' @inheritParams abc_smc_process
+#' @param indir Directory containing the batch files output from
+#'        \code{\link{abc_smc_wave}} for merging into a single file.
+#'
 #' @export
+#'
 merge_abc <- function(wave, indir = "data/", outdir = "data/") {
 
   files <- list.files(indir, pattern = paste0("wave", wave, ".batch"), full.names = TRUE)
