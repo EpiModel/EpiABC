@@ -1,6 +1,5 @@
 
 library("methods")
-library("Rmpi")
 library("snow")
 suppressMessages(library("EpiABC"))
 suppressMessages(library("EpiModel"))
@@ -30,18 +29,21 @@ priors <- list(c("unif", 0.2, 0.4),
                c("unif", 0.05, 0.25))
 prev.targ <- 0.25
 
-uni <- mpi.universe.size() - 1
+if (!require("Rmpi", character.only = TRUE)) {
+  uni <- parallel::detectCores() - 1
+} else {
+  uni <- mpi.universe.size()-1
+}
 cluster <- makeCluster(uni)
 
-a <- ABC_sequential(method = "Lenormand",
-                    model = myfunc,
-                    prior = priors,
-                    nb_simul = 200,
-                    summary_stat_target = prev.targ,
-                    p_acc_min = 0.05,
-                    n_cluster = uni,
-                    use_seed = TRUE,
-                    cl = cluster)
+a <- abc_smc_cluster(model = myfunc,
+                     prior = priors,
+                     nb_simul = 200,
+                     summary_stat_target = prev.targ,
+                     p_acc_min = 0.05,
+                     n_cluster = uni,
+                     use_seed = TRUE,
+                     cl = cluster)
 save(a, file = "sisfit.rda")
 
 stopCluster(cluster)
