@@ -2,7 +2,7 @@
 library("methods")
 library("Rmpi")
 library("snow")
-suppressMessages(library("EasyABCMPI"))
+suppressMessages(library("EpiABC"))
 suppressMessages(library("EpiModel"))
 
 n <- 1000
@@ -46,30 +46,3 @@ save(a, file = "sisfit.rda")
 
 stopCluster(cluster)
 mpi.exit()
-
-
-
-library("snow")
-suppressMessages(library("EpiModel"))
-suppressMessages(library("EasyABCMPI"))
-
-uni = 2
-uni = parallel::detectCores()
-uni
-# cluster <- makeCluster(uni)
-a <- EasyABC::ABC_sequential(method = "Lenormand",
-                    model = myfunc,
-                    prior = priors,
-                    nb_simul = 200,
-                    summary_stat_target = prev.targ,
-                    p_acc_min = 0.05,
-                    n_cluster = uni,
-                    progress_bar = TRUE,
-                    use_seed = TRUE)
-# stopCluster(cluster)
-
-
-nb_simul <- 200
-n_cluster <- 95
-( npar = floor(nb_simul/(100 * n_cluster)) )
-( n_end = nb_simul - (npar * 100 * n_cluster) )

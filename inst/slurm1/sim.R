@@ -33,8 +33,6 @@ for (i in 1:20) {
 }
 
 
-
-
 # batch workflow ----------------------------------------------------------
 
 # interactive
@@ -79,10 +77,3 @@ abc_smc_process(wave = 2)
 
 w2 <- out_abc(wave = 2)
 summary_abc(w2)
-
-
-
-## TODO:
-## master sim script does smart file names based on batch
-## helper function to write sbatch scripts?
-

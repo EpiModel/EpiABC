@@ -1,6 +1,4 @@
 
-system("scp hyak:~/sisfit.rda inst/epimodel1")
-
 load("inst/epimodel1/sisfit.rda")
 plot(density(a$stats))
 

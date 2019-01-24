@@ -18,26 +18,16 @@ toy_model_parallel <- function(x){
 sum_stat_obs <- 6.5
 toy_prior <- list(c("unif",0,1))
 
-# system.time({
-# profvis({
-  fit <- ABC_sequential(method = "Lenormand",
-                        model = toy_model_parallel,
-                        prior = toy_prior,
-                        summary_stat_target = sum_stat_obs,
-                        nb_simul = 200,
-                        alpha = 0.5,
-                        p_acc_min = 0.45,
-                        use_seed = TRUE,
-                        n_cluster = uni,
-                        cl = cluster)
-# })
-# })
-
-# save(fit, file = "fit.rda")
+fit <- ABC_sequential(method = "Lenormand",
+                      model = toy_model_parallel,
+                      prior = toy_prior,
+                      summary_stat_target = sum_stat_obs,
+                      nb_simul = 200,
+                      alpha = 0.5,
+                      p_acc_min = 0.45,
+                      use_seed = TRUE,
+                      n_cluster = uni,
+                      cl = cluster)
 
 stopCluster(cluster)
-# mpi.exit()
 
-# uni 2 st 110, 142
-# uni 4 st 86, 68
-# uni 8 st 59, 52
