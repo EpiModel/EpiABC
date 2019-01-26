@@ -641,24 +641,16 @@ sbatch_master_abc <- function(input,
 
 
 
-  # if (append == TRUE) {
-  #   if (missing(simno.start)) {
-  #     t <- read.table(master.file)
-  #     t <- as.list(t[nrow(t), ])
-  #     tpos <- unname(which(sapply(t, function(x) grepl("SIMNO", x)) == TRUE))
-  #     vs <- as.character(t[[tpos]])
-  #     vs1 <- strsplit(vs, ",")[[1]][2]
-  #     sn <- as.numeric(strsplit(vs1, "=")[[1]][2])
-  #     SIMNO <- (sn + 1):(sn + nsets)
-  #   } else {
-  #     SIMNO <- simno.start:(simno.start + nsets - 1)
-  #   }
-  # } else {
-  #   if (missing(simno.start)) {
-  #     simno.start <- 1
-  #   }
-  #   SIMNO <- simno.start:(simno.start + nsets - 1)
-  # }
+  if (append == TRUE) {
+    tab <- readLines(master.file, skipNul = TRUE)
+    tab.last <- tail(tab, 1)
+    tab.split <- strsplit(tab.last, " ")[[1]]
+    job <- tab.split[grep("--job-name", tab.split)]
+    last.job <- as.numeric(strsplit(job, "wave")[[1]][2])
+    start.job <- last.job + 1
+  } else {
+    start.job <- 0
+  }
 
   ncores <- input$ncores
   batchSize <- input$batchSize
@@ -673,7 +665,7 @@ sbatch_master_abc <- function(input,
     cat("#!/bin/bash\n", file = master.file)
   }
 
-  for (i in 0:nwaves) {
+  for (i in start.job:nwaves) {
 
     if (i == 0) {
       array <- paste0("--array=1-", batchSize[1])
@@ -682,7 +674,7 @@ sbatch_master_abc <- function(input,
     }
     job <- paste0("--job-name=wave", i)
     expt <- paste0("--export=ALL,wave=", i)
-    if (i == 0) {
+    if (i == start.job) {
       depend <- ""
     } else {
       depend <- paste0("--depend=afterany:$(squeue --noheader --format %i --name wave", i - 1, ")")
