@@ -405,7 +405,9 @@ get_posterior <- function(wave, input = "data/") {
 
   if (class(input) == "character") {
     file <- list.files(input, pattern = paste0("wave", wave, ".rda"), full.names = TRUE)
-    if (length(file) == 0) return(NULL)
+    if (length(file) == 0) {
+      stop("No files in ", input, " named ", paste0("abc.wave", wave, ".rda"), call. = FALSE)
+    }
     input <- readRDS(file)
   }
 
