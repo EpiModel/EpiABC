@@ -415,6 +415,11 @@ get_posterior <- function(wave, input = "data/") {
   summary_stat_target <- input$init$summary_stat_target
   dist_weights <- input$init$dist_weights
 
+  priors <- list()
+  for (i in 1:length(input$init$prior)) {
+    priors[[i]] <- input$init$prior[[i]]$sampleArgs[2:3]
+  }
+
   # prior wave
   simul_below_tol <- input$pwave$simul_below_tol
   tab_weight <- input$pwave$tab_weight
@@ -422,6 +427,7 @@ get_posterior <- function(wave, input = "data/") {
   p_acc <- input$pwave$p_acc
 
   out <- list(param = as.matrix(as.matrix(simul_below_tol)[, 1:nparam]),
+              priors = priors,
               stats = as.matrix(as.matrix(simul_below_tol)[, (nparam + 1):(nparam + nstat)]),
               target = summary_stat_target,
               weights = tab_weight/sum(tab_weight), stats_normalization = as.numeric(sd_simul),
