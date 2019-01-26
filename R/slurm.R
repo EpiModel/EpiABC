@@ -598,3 +598,104 @@ merge_abc <- function(wave, indir = "data/", outdir = "data/") {
   unlink(files)
 
 }
+
+
+#' @title Create sbatch Bash Shell Script ABC-SMC Workflow
+#'
+#' @description Creates a master-level SLURM::sbatch script given a ABC-SMC
+#'              model prepared and output from \code{abc_smc_prep}.
+#'
+#' @param input Output object from \code{\link{abc_smc_prep}}.
+#' @param nwaves Number of waves of SMC to run, not including wave = 0 that is the
+#'        starting wave based on ABC rejection.
+#' @param master.file Name of the output bash shell script file to write. If
+#'        \code{""}, then will print to console.
+#' @param runsim.file Name of the bash shell script file that runs the R simulation
+#'        job.
+#' @param ckpt If \code{TRUE}, use the checkpoint queue to submit jobs. If
+#'        numeric, will specify the first X jobs on the grid as non-backfill.
+#' @param append If \code{TRUE}, will append lines to a previously created shell
+#'        script. New simno will either start with value of \code{simno.start}
+#'        or the previous value if missing.
+#' @param mem Amount of memory needed per node within each Slurm job.
+#' @param walltime Amount of clock time needed per Slurm job.
+#' @param partition.main Name of primary HPC partition (passed to -p).
+#' @param partition.ckpt Name of checkpoint HPC partition (passed to -p).
+#' @param account.main Name of primary account (passed to -A).
+#' @param account.ckpt Name of checkpoint account (passed to -A).
+#'
+#' @export
+#'
+sbatch_master_abc <- function(input,
+                              nwaves,
+                              master.file = "master.sh",
+                              runsim.file = "runsim.sh",
+                              ckpt = FALSE,
+                              append = FALSE,
+                              mem = "55G",
+                              walltime = "1:00:00",
+                              partition.main = "csde",
+                              partition.ckpt = "ckpt",
+                              account.main = "csde",
+                              account.ckpt = "csde-ckpt") {
+
+
+
+  # if (append == TRUE) {
+  #   if (missing(simno.start)) {
+  #     t <- read.table(master.file)
+  #     t <- as.list(t[nrow(t), ])
+  #     tpos <- unname(which(sapply(t, function(x) grepl("SIMNO", x)) == TRUE))
+  #     vs <- as.character(t[[tpos]])
+  #     vs1 <- strsplit(vs, ",")[[1]][2]
+  #     sn <- as.numeric(strsplit(vs1, "=")[[1]][2])
+  #     SIMNO <- (sn + 1):(sn + nsets)
+  #   } else {
+  #     SIMNO <- simno.start:(simno.start + nsets - 1)
+  #   }
+  # } else {
+  #   if (missing(simno.start)) {
+  #     simno.start <- 1
+  #   }
+  #   SIMNO <- simno.start:(simno.start + nsets - 1)
+  # }
+
+  ncores <- input$ncores
+  batchSize <- input$batchSize
+
+  if (ckpt == TRUE) {
+    pA <- paste("-p", partition.ckpt, "-A", account.ckpt)
+  } else {
+    pA <- paste("-p", partition.main, "-A", account.main)
+  }
+
+  if (append == FALSE) {
+    cat("#!/bin/bash\n", file = master.file)
+  }
+
+  for (i in 0:nwaves) {
+
+    if (i == 0) {
+      array <- paste0("--array=1-", batchSize[1])
+    } else {
+      array <- paste0("--array=1-", batchSize[2])
+    }
+    job <- paste0("--job-name=wave", i)
+    expt <- paste0("--export=ALL,wave=", i)
+    if (i == 0) {
+      depend <- ""
+    } else {
+      depend <- paste0("--depend=afterany:$(squeue --noheader --format %i --name wave", i - 1, ")")
+    }
+    ntasks <- paste0("--ntasks-per-node=", ncores)
+    memout <- paste0("--mem=", mem)
+    time <- paste0("--time=", walltime)
+
+    cat("\nsbatch", pA, array,
+        job, expt, depend, ntasks,
+        memout, time, runsim.file,
+        file = master.file, append = TRUE, sep = " ")
+  }
+  cat("\n", file = master.file, append = TRUE)
+
+}
