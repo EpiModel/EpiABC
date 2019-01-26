@@ -449,22 +449,35 @@ get_posterior <- function(wave, input = "data/") {
 #' @method summary abcsmc
 #' @export
 #'
-summary.abcsmc <- function(object, ...) {
+summary.abcsmc <- function(object, digits = 3, ...) {
 
-  cat("Wave:", object$wave)
+  cat("ABC-SMC Model Summary")
+  cat("\n==========================")
+  cat("\nWave:", object$wave)
   cat("\np_acc:", object$p_acc)
 
-  paramSumm <- apply(object$param, 2, summary)
-  colnames(paramSumm) <- rep("", ncol(paramSumm))
   statsSumm <- apply(object$stats, 2, summary)
+  statsSumm <- rbind(object$target, statsSumm)
   colnames(statsSumm) <- rep("", ncol(statsSumm))
+  rownames(statsSumm)[1] <- "Target"
+  statsSumm <- round(statsSumm, digits)
 
-  cat("\n\nTarget Stats: \n", object$target)
-  cat("\nSimulated Targets")
-  cat("\n-----------------")
+  paramSumm <- apply(object$param, 2, summary)
+
+  allPriors <- matrix(nrow = 2, ncol = length(object$priors))
+  for (i in 1:length(object$priors)) {
+    allPriors[, i] <- as.numeric(object$priors[[i]])
+  }
+  paramSumm <- rbind(allPriors, paramSumm)
+  colnames(paramSumm) <- rep("", ncol(paramSumm))
+  rownames(paramSumm)[1:2] <- c("Prior L", "Prior H")
+  paramSumm <- round(paramSumm, digits)
+
+  cat("\n\nModel Statistics")
+  cat("\n-------------------")
   print(statsSumm)
 
-  cat("\nEsimated Parameters")
+  cat("\nModel Parameters")
   cat("\n-------------------")
   print(paramSumm)
 
