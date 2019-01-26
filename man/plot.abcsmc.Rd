@@ -2,9 +2,9 @@
 % Please edit documentation in R/slurm.R
 \name{plot.abcsmc}
 \alias{plot.abcsmc}
-\title{Plot Posterior Distribution of Parameters and Summary Statistics}
+\title{Kernel Density Plot for Posterior Distribution of Parameters and Summary Statistics}
 \usage{
-\method{plot}{abcsmc}(x, type, ...)
+\method{plot}{abcsmc}(x, type, stats.postive = FALSE, ...)
 }
 \arguments{
 \item{x}{Output from \code{\link{get_posterior}}.}
@@ -12,8 +12,11 @@
 \item{type}{Character string of \code{type="stats"} for model statistics
 or \code{type="param"} for model parameters.}
 
+\item{stats.postive}{If \code{TRUE}, constrain the lower bound of the kernel
+density at 0 for summary statistics plots.}
+
 \item{...}{Additional arguments based to generic \code{plot}.}
 }
 \description{
-Plot Posterior Distribution of Parameters and Summary Statistics
+Kernel Density Plot for Posterior Distribution of Parameters and Summary Statistics
 }

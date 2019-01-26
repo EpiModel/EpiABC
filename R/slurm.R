@@ -714,17 +714,19 @@ sbatch_master_abc <- function(input,
 }
 
 
-#' Plot Posterior Distribution of Parameters and Summary Statistics
+#' Kernel Density Plot for Posterior Distribution of Parameters and Summary Statistics
 #'
 #' @param x Output from \code{\link{get_posterior}}.
 #' @param type Character string of \code{type="stats"} for model statistics
 #'        or \code{type="param"} for model parameters.
+#' @param stats.postive If \code{TRUE}, constrain the lower bound of the kernel
+#'        density at 0 for summary statistics plots.
 #' @param ... Additional arguments based to generic \code{plot}.
 #'
 #' @method plot abcsmc
 #' @export
 #'
-plot.abcsmc <- function(x, type, ...) {
+plot.abcsmc <- function(x, type, stats.postive = FALSE, ...) {
 
   stats <- as.data.frame(x$stats)
   param <- as.data.frame(x$param)
@@ -751,10 +753,18 @@ plot.abcsmc <- function(x, type, ...) {
   par(mar = c(2.2,3,2,1), mgp = c(2, 1, 0), mfrow = dimens)
 
   if (type == "stats") {
-    for (i in 1:nstats) {
-      plot(density(stats[, i]), main = paste0("Statistic ", i), lwd = 2)
-      grid()
-      abline(v = x$target[i], col = "red", lty = 2, lwd = 2)
+    if (stats.postive == FALSE) {
+      for (i in 1:nstats) {
+        plot(density(stats[, i]), main = paste0("Statistic ", i), lwd = 2)
+        grid()
+        abline(v = x$target[i], col = "red", lty = 2, lwd = 2)
+      }
+    } else {
+      for (i in 1:nstats) {
+        plot(density(stats[, i], from = 0), main = paste0("Statistic ", i), lwd = 2)
+        grid()
+        abline(v = x$target[i], col = "red", lty = 2, lwd = 2)
+      }
     }
   }
 
