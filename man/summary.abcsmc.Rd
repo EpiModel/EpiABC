@@ -4,7 +4,7 @@
 \alias{summary.abcsmc}
 \title{Numerical Summary of Posterior Distribution of Parameters and Summary Statistics}
 \usage{
-\method{summary}{abcsmc}(object, ...)
+\method{summary}{abcsmc}(object, digits = 3, ...)
 }
 \arguments{
 \item{object}{Output from \code{\link{get_posterior}}.}
