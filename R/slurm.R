@@ -781,3 +781,57 @@ plot.abcsmc <- function(x, type, stats.postive = FALSE, ...) {
 
   on.exit(par(ops))
 }
+
+#' Boxplot for Posterior Distribution of Parameters and Summary Statistics
+#'
+#' @param x Output from \code{\link{get_posterior}}.
+#' @param type Character string of \code{type="stats"} for model statistics
+#'        or \code{type="param"} for model parameters.
+#' @param ... Additional arguments based to generic \code{plot}.
+#'
+#' @method plot abcsmc
+#' @export
+#'
+boxplot.abcsmc <- function(x, type, ...) {
+
+  stats <- as.data.frame(x$stats)
+  param <- as.data.frame(x$param)
+
+  if (type == "stats") {
+    nstats <- ncol(stats)
+  } else if (type == "param") {
+    nstats <- ncol(param)
+  }
+
+  if (nstats == 1) dimens <- c(1, 1)
+  if (nstats == 2) dimens <- c(1, 2)
+  if (nstats == 3) dimens <- c(1, 3)
+  if (nstats == 4) dimens <- c(2, 2)
+  if (nstats == 5) dimens <- c(2, 3)
+  if (nstats == 6) dimens <- c(2, 3)
+  if (nstats %in% 7:9) dimens <- c(3, 3)
+  if (nstats %in% 10:12) dimens <- c(4, 3)
+  if (nstats %in% 13:16) dimens <- c(4, 4)
+  if (nstats > 16) dimens <- rep(ceiling(sqrt(nstats)), 2)
+
+  # Pull graphical parameters
+  ops <- list(mar = par()$mar, mfrow = par()$mfrow, mgp = par()$mgp)
+  par(mar = c(2,2.5,2,1), mgp = c(2, 1, 0), mfrow = dimens)
+
+  if (type == "stats") {
+    for (i in 1:nstats) {
+      boxplot(stats[, i], col = adjustcolor("steelblue", alpha.f = 0.6),
+              main = paste0("Statistic ", i))
+      points(out$target[i], pch = 20, cex = 2, col = "red")
+    }
+  }
+
+  if (type == "param") {
+    for (i in 1:nstats) {
+      boxplot(param[, i], col = adjustcolor("steelblue", alpha.f = 0.6),
+              main = paste0("Parameter ", i))
+    }
+  }
+
+  on.exit(par(ops))
+}
