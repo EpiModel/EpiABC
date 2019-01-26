@@ -4,7 +4,7 @@
 \alias{boxplot.abcsmc}
 \title{Boxplot for Posterior Distribution of Parameters and Summary Statistics}
 \usage{
-\method{plot}{abcsmc}(x, type, ...)
+\method{boxplot}{abcsmc}(x, type, ...)
 }
 \arguments{
 \item{x}{Output from \code{\link{get_posterior}}.}

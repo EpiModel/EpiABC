@@ -27,5 +27,9 @@
 #' @importFrom stats as.formula cov cov.wt lm optimize rnorm runif sd uniroot var
 #' @importFrom utils flush.console read.table write.table
 #' @importFrom stringr str_pad
+#' @importFrom grDevices adjustcolor
+#' @importFrom graphics abline boxplot grid par plot points
+#' @importFrom stats density
+#' @importFrom utils tail
 #'
 NULL

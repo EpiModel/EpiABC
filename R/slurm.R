@@ -446,6 +446,7 @@ get_posterior <- function(wave, input = "data/") {
 #' Numerical Summary of Posterior Distribution of Parameters and Summary Statistics
 #'
 #' @param object Output from \code{\link{get_posterior}}.
+#' @param digits Significant digits to print in output.
 #' @param ... Additional arguments based to generic \code{summary}.
 #'
 #' @method summary abcsmc
@@ -719,14 +720,14 @@ sbatch_master_abc <- function(input,
 #' @param x Output from \code{\link{get_posterior}}.
 #' @param type Character string of \code{type="stats"} for model statistics
 #'        or \code{type="param"} for model parameters.
-#' @param stats.postive If \code{TRUE}, constrain the lower bound of the kernel
+#' @param stats.positive If \code{TRUE}, constrain the lower bound of the kernel
 #'        density at 0 for summary statistics plots.
 #' @param ... Additional arguments based to generic \code{plot}.
 #'
 #' @method plot abcsmc
 #' @export
 #'
-plot.abcsmc <- function(x, type, stats.postive = FALSE, ...) {
+plot.abcsmc <- function(x, type, stats.positive = FALSE, ...) {
 
   stats <- as.data.frame(x$stats)
   param <- as.data.frame(x$param)
@@ -753,7 +754,7 @@ plot.abcsmc <- function(x, type, stats.postive = FALSE, ...) {
   par(mar = c(2.2,3,2,1), mgp = c(2, 1, 0), mfrow = dimens)
 
   if (type == "stats") {
-    if (stats.postive == FALSE) {
+    if (stats.positive == FALSE) {
       for (i in 1:nstats) {
         plot(density(stats[, i]), main = paste0("Statistic ", i), lwd = 2)
         grid()
@@ -789,7 +790,7 @@ plot.abcsmc <- function(x, type, stats.postive = FALSE, ...) {
 #'        or \code{type="param"} for model parameters.
 #' @param ... Additional arguments based to generic \code{plot}.
 #'
-#' @method plot abcsmc
+#' @method boxplot abcsmc
 #' @export
 #'
 boxplot.abcsmc <- function(x, type, ...) {
@@ -822,7 +823,7 @@ boxplot.abcsmc <- function(x, type, ...) {
     for (i in 1:nstats) {
       boxplot(stats[, i], col = adjustcolor("steelblue", alpha.f = 0.6),
               main = paste0("Statistic ", i))
-      points(out$target[i], pch = 20, cex = 2, col = "red")
+      points(x$target[i], pch = 20, cex = 2, col = "red")
     }
   }
 

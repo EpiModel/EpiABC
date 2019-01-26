@@ -9,6 +9,8 @@
 \arguments{
 \item{object}{Output from \code{\link{get_posterior}}.}
 
+\item{digits}{Significant digits to print in output.}
+
 \item{...}{Additional arguments based to generic \code{summary}.}
 }
 \description{
