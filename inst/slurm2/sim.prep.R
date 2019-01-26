@@ -12,7 +12,7 @@ formation <- ~edges
 target.stats <- 0.75*(n/2)
 coef.diss <- dissolution_coefs(dissolution = ~offset(edges), duration = 20)
 est <- netest(nw, formation, target.stats, coef.diss, verbose = FALSE)
-save(est, file = "est.rda")
+save(est, file = "inst/slurm2/est.rda")
 
 
 
@@ -21,7 +21,7 @@ save(est, file = "est.rda")
 myfunc <- function(x) {
   set.seed(x[1])
   require(EpiModel)
-  load("est.rda")
+  load("inst/slurm2/est.rda")
   param <- param.net(inf.prob = x[2], rec.rate = x[3])
   init <- init.net(i.num = 50, status.rand = FALSE)
   control <- control.net(type = "SIS", nsteps = 300, nsims = 1, verbose = FALSE)
@@ -49,10 +49,14 @@ prep <- abc_smc_prep(model = myfunc,
                      ncores = 16,
                      alpha = 0.2)
 prep
-saveRDS(prep, file = "data/abc.prep.rda")
+saveRDS(prep, file = "inst/slurm2/data/abc.prep.rda")
 
-# Batches for Wave 0
-ceiling(prep$nsims/prep$ncores)
+debug(sbatch_master_abc)
+sbatch_master_abc(prep,
+                  master.file = "inst/slurm2/master.sh",
+                  nwaves = 10, ckpt = TRUE)
 
-# Batches for Wave 1+
-ceiling((prep$nsims - ceiling(prep$nsims * prep$alpha))/prep$ncores)
+sbatch_master_abc(prep,
+                  master.file = "inst/slurm2/master.sh",
+                  nwaves = 20, ckpt = TRUE, append = TRUE)
+
