@@ -1,4 +1,4 @@
-# EpiABC
+EpiABC
 ============
 ### Approximate Bayesian Computation for EpiModel on High-Performance Computing Clusters
 
