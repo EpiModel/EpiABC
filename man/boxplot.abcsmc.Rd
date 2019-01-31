@@ -4,13 +4,16 @@
 \alias{boxplot.abcsmc}
 \title{Boxplot for Posterior Distribution of Parameters and Summary Statistics}
 \usage{
-\method{boxplot}{abcsmc}(x, type, ...)
+\method{boxplot}{abcsmc}(x, type, stats, ...)
 }
 \arguments{
 \item{x}{Output from \code{\link{get_posterior}}.}
 
 \item{type}{Character string of \code{type="stats"} for model statistics
 or \code{type="param"} for model parameters.}
+
+\item{stats}{Numeric vector of statistics (or parameters) by position in
+\code{x} to plot.}
 
 \item{...}{Additional arguments based to generic \code{plot}.}
 }

@@ -720,6 +720,8 @@ sbatch_master_abc <- function(input,
 #' @param x Output from \code{\link{get_posterior}}.
 #' @param type Character string of \code{type="stats"} for model statistics
 #'        or \code{type="param"} for model parameters.
+#' @param stats Numeric vector of statistics (or parameters) by position in
+#'        \code{x} to plot.
 #' @param stats.positive If \code{TRUE}, constrain the lower bound of the kernel
 #'        density at 0 for summary statistics plots.
 #' @param ... Additional arguments based to generic \code{plot}.
@@ -727,15 +729,23 @@ sbatch_master_abc <- function(input,
 #' @method plot abcsmc
 #' @export
 #'
-plot.abcsmc <- function(x, type, stats.positive = FALSE, ...) {
+plot.abcsmc <- function(x, type, stats, stats.positive = FALSE, ...) {
 
-  stats <- as.data.frame(x$stats)
+  summstats <- as.data.frame(x$stats)
   param <- as.data.frame(x$param)
-
   if (type == "stats") {
-    nstats <- ncol(stats)
+    nstats <- ncol(summstats)
   } else if (type == "param") {
     nstats <- ncol(param)
+  }
+
+  if (missing(stats)) {
+    stats <- 1:nstats
+  } else {
+    if (max(stats) > nstats) {
+      stop("Maximum for stats is ", nstats, call. = FALSE)
+    }
+    nstats <- length(stats)
   }
 
   if (nstats == 1) dimens <- c(1, 1)
@@ -755,14 +765,14 @@ plot.abcsmc <- function(x, type, stats.positive = FALSE, ...) {
 
   if (type == "stats") {
     if (stats.positive == FALSE) {
-      for (i in 1:nstats) {
-        plot(density(stats[, i]), main = paste0("Statistic ", i), lwd = 2)
+      for (i in stats) {
+        plot(density(summstats[, i]), main = paste0("Statistic ", i), lwd = 2)
         grid()
         abline(v = x$target[i], col = "red", lty = 2, lwd = 2)
       }
     } else {
-      for (i in 1:nstats) {
-        plot(density(stats[, i], from = 0), main = paste0("Statistic ", i), lwd = 2)
+      for (i in stats) {
+        plot(density(summstats[, i], from = 0), main = paste0("Statistic ", i), lwd = 2)
         grid()
         abline(v = x$target[i], col = "red", lty = 2, lwd = 2)
       }
@@ -770,7 +780,7 @@ plot.abcsmc <- function(x, type, stats.positive = FALSE, ...) {
   }
 
   if (type == "param") {
-    for (i in 1:nstats) {
+    for (i in stats) {
       plot(density(param[, i], from = as.numeric(x$priors[[i]][1]),
                    to = as.numeric(x$priors[[i]][2])),
            main = paste0("Parameter ", i), lwd = 2,
@@ -788,20 +798,30 @@ plot.abcsmc <- function(x, type, stats.positive = FALSE, ...) {
 #' @param x Output from \code{\link{get_posterior}}.
 #' @param type Character string of \code{type="stats"} for model statistics
 #'        or \code{type="param"} for model parameters.
+#' @param stats Numeric vector of statistics (or parameters) by position in
+#'        \code{x} to plot.
 #' @param ... Additional arguments based to generic \code{plot}.
 #'
 #' @method boxplot abcsmc
 #' @export
 #'
-boxplot.abcsmc <- function(x, type, ...) {
+boxplot.abcsmc <- function(x, type, stats, ...) {
 
-  stats <- as.data.frame(x$stats)
+  summstats <- as.data.frame(x$stats)
   param <- as.data.frame(x$param)
-
   if (type == "stats") {
-    nstats <- ncol(stats)
+    nstats <- ncol(summstats)
   } else if (type == "param") {
     nstats <- ncol(param)
+  }
+
+  if (missing(stats)) {
+    stats <- 1:nstats
+  } else {
+    if (max(stats) > nstats) {
+      stop("Maximum for stats is ", nstats, call. = FALSE)
+    }
+    nstats <- length(stats)
   }
 
   if (nstats == 1) dimens <- c(1, 1)
@@ -820,15 +840,15 @@ boxplot.abcsmc <- function(x, type, ...) {
   par(mar = c(2,2.5,2,1), mgp = c(2, 1, 0), mfrow = dimens)
 
   if (type == "stats") {
-    for (i in 1:nstats) {
-      boxplot(stats[, i], col = adjustcolor("steelblue", alpha.f = 0.6),
+    for (i in stats) {
+      boxplot(summstats[, i], col = adjustcolor("steelblue", alpha.f = 0.6),
               main = paste0("Statistic ", i))
       points(x$target[i], pch = 20, cex = 2, col = "red")
     }
   }
 
   if (type == "param") {
-    for (i in 1:nstats) {
+    for (i in stats) {
       boxplot(param[, i], col = adjustcolor("steelblue", alpha.f = 0.6),
               main = paste0("Parameter ", i))
     }

@@ -4,13 +4,16 @@
 \alias{plot.abcsmc}
 \title{Kernel Density Plot for Posterior Distribution of Parameters and Summary Statistics}
 \usage{
-\method{plot}{abcsmc}(x, type, stats.positive = FALSE, ...)
+\method{plot}{abcsmc}(x, type, stats, stats.positive = FALSE, ...)
 }
 \arguments{
 \item{x}{Output from \code{\link{get_posterior}}.}
 
 \item{type}{Character string of \code{type="stats"} for model statistics
 or \code{type="param"} for model parameters.}
+
+\item{stats}{Numeric vector of statistics (or parameters) by position in
+\code{x} to plot.}
 
 \item{stats.positive}{If \code{TRUE}, constrain the lower bound of the kernel
 density at 0 for summary statistics plots.}
