@@ -854,7 +854,7 @@ boxplot.abcsmc <- function(x, type, stats, ...) {
   if (type == "stats") {
     for (i in stats) {
       boxplot(summstats[, i], col = adjustcolor("steelblue", alpha.f = 0.6),
-              main = paste0("Statistic ", i))
+              main = paste0("Statistic ", i), ...)
       points(x$target[i], pch = 20, cex = 2, col = "red")
     }
   }
@@ -862,7 +862,7 @@ boxplot.abcsmc <- function(x, type, stats, ...) {
   if (type == "param") {
     for (i in stats) {
       boxplot(param[, i], col = adjustcolor("steelblue", alpha.f = 0.6),
-              main = paste0("Parameter ", i))
+              main = paste0("Parameter ", i), ...)
     }
   }
 
