@@ -722,6 +722,8 @@ sbatch_master_abc <- function(input,
 #'        or \code{type="param"} for model parameters.
 #' @param stats Numeric vector of statistics (or parameters) by position in
 #'        \code{x} to plot.
+#' @param mean.line If \code{TRUE}, plot the mean of the stat/parameter distribution
+#'        as a blue line.
 #' @param stats.positive If \code{TRUE}, constrain the lower bound of the kernel
 #'        density at 0 for summary statistics plots.
 #' @param ... Additional arguments based to generic \code{plot}.
@@ -729,7 +731,8 @@ sbatch_master_abc <- function(input,
 #' @method plot abcsmc
 #' @export
 #'
-plot.abcsmc <- function(x, type, stats, stats.positive = FALSE, ...) {
+plot.abcsmc <- function(x, type, stats, mean.line = TRUE,
+                        stats.positive = FALSE, ...) {
 
   summstats <- as.data.frame(x$stats)
   param <- as.data.frame(x$param)
@@ -769,12 +772,18 @@ plot.abcsmc <- function(x, type, stats, stats.positive = FALSE, ...) {
         plot(density(summstats[, i]), main = paste0("Statistic ", i), lwd = 2)
         grid()
         abline(v = x$target[i], col = "red", lty = 2, lwd = 2)
+        if (mean.line == TRUE) {
+          abline(v = colMeans(summstats[, i, drop = FALSE]), lty = 1, lwd = 1.5, col = "blue")
+        }
       }
     } else {
       for (i in stats) {
         plot(density(summstats[, i], from = 0), main = paste0("Statistic ", i), lwd = 2)
         grid()
         abline(v = x$target[i], col = "red", lty = 2, lwd = 2)
+        if (mean.line == TRUE) {
+          abline(v = colMeans(summstats[, i, drop = FALSE]), lty = 1, lwd = 1.5, col = "blue")
+        }
       }
     }
   }
@@ -787,6 +796,9 @@ plot.abcsmc <- function(x, type, stats, stats.positive = FALSE, ...) {
            xlim = as.numeric(x$priors[[i]]))
       grid()
       abline(v = as.numeric(x$priors[[i]]), col = "red", lty = 2, lwd = 2)
+      if (mean.line == TRUE) {
+        abline(v = colMeans(param[, i, drop = FALSE]), lty = 1, lwd = 1.5, col = "blue")
+      }
     }
   }
 
