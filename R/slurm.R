@@ -531,6 +531,8 @@ abc_wave0 <- function(model,
 
   cl <- makeCluster(ncores)
   list_simul_summarystat <- parLapplyLB(cl, list_param, model)
+  simul_sim <- list_simul_summarystat$sim
+  list_simul_summarystat <- c(list_simul_summarystat$sti, list_simul_summarystat$hiv)
   stopCluster(cl)
 
   tab_simul_summarystat <- do.call("rbind", list_simul_summarystat)
@@ -538,6 +540,7 @@ abc_wave0 <- function(model,
   options(scipen = 0)
 
   out <- cbind(tab_param, tab_simul_summarystat)
+  saveRDS(simul_sim, file = paste0("save",Sys.time(),batch,".rda"))
   return(out)
 }
 
