@@ -641,6 +641,7 @@ merge_abc <- function(wave, indir = "data/", outdir = "data/") {
 #'        or the previous value if missing.
 #' @param mem Amount of memory needed per node within each Slurm job.
 #' @param walltime Amount of clock time needed per Slurm job.
+#' @param user Hyak user name.
 #' @param partition.main Name of primary HPC partition (passed to -p).
 #' @param partition.ckpt Name of checkpoint HPC partition (passed to -p).
 #' @param account.main Name of primary account (passed to -A).
@@ -656,6 +657,7 @@ sbatch_master_abc <- function(input,
                               append = FALSE,
                               mem = "55G",
                               walltime = "1:00:00",
+                              user,
                               partition.main = "csde",
                               partition.ckpt = "ckpt",
                               account.main = "csde",
@@ -676,6 +678,9 @@ sbatch_master_abc <- function(input,
 
   ncores <- input$ncores
   batchSize <- input$batchSize
+  if (missing(user)) {
+    stop("Specify Hyak user name in user parameter", call. = FALSE)
+  }
 
   if (ckpt == TRUE) {
     pA <- paste("-p", partition.ckpt, "-A", account.ckpt)
@@ -699,7 +704,7 @@ sbatch_master_abc <- function(input,
     if (i == start.job) {
       depend <- ""
     } else {
-      depend <- paste0("--depend=afterany:$(squeue --noheader --format %i --name wave", i - 1, ")")
+      depend <- paste0("--depend=afterany:$(squeue --noheader --format %i --name wave", i - 1, " -u ", user, ")")
     }
     ntasks <- paste0("--ntasks-per-node=", ncores)
     memout <- paste0("--mem=", mem)

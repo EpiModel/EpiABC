@@ -6,7 +6,7 @@
 \usage{
 sbatch_master_abc(input, nwaves, master.file = "master.sh",
   runsim.file = "runsim.sh", ckpt = FALSE, append = FALSE,
-  mem = "55G", walltime = "1:00:00", partition.main = "csde",
+  mem = "55G", walltime = "1:00:00", user, partition.main = "csde",
   partition.ckpt = "ckpt", account.main = "csde",
   account.ckpt = "csde-ckpt")
 }
@@ -32,6 +32,8 @@ or the previous value if missing.}
 \item{mem}{Amount of memory needed per node within each Slurm job.}
 
 \item{walltime}{Amount of clock time needed per Slurm job.}
+
+\item{user}{Hyak user name.}
 
 \item{partition.main}{Name of primary HPC partition (passed to -p).}
 
