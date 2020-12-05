@@ -4,8 +4,7 @@
 \alias{plot.abcsmc}
 \title{Kernel Density Plot for Posterior Distribution of Parameters and Summary Statistics}
 \usage{
-\method{plot}{abcsmc}(x, type, stats, mean.line = TRUE,
-  stats.positive = FALSE, ...)
+\method{plot}{abcsmc}(x, type, stats, mean.line = TRUE, stats.positive = FALSE, ...)
 }
 \arguments{
 \item{x}{Output from \code{\link{get_posterior}}.}

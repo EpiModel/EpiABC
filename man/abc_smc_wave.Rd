@@ -4,8 +4,7 @@
 \alias{abc_smc_wave}
 \title{Simulates the ABC-SMC Slurm Model}
 \usage{
-abc_smc_wave(input = "data/", wave, batch, save = TRUE,
-  outdir = "data/")
+abc_smc_wave(input = "data/", wave, batch, save = TRUE, outdir = "data/")
 }
 \arguments{
 \item{input}{A character string containing the directory of the output file

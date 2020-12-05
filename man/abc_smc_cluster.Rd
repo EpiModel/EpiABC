@@ -5,8 +5,17 @@
 \title{Approximate Bayesian Computation with Sequential Monte Carlo Sampling on
 High-Performance Computing Clusters}
 \usage{
-abc_smc_cluster(model, prior, nsims, summary_stat_target,
-  prior_test = NULL, verbose = FALSE, dist_weights = NULL, cl, ...)
+abc_smc_cluster(
+  model,
+  prior,
+  nsims,
+  summary_stat_target,
+  prior_test = NULL,
+  verbose = FALSE,
+  dist_weights = NULL,
+  cl,
+  ...
+)
 }
 \arguments{
 \item{model}{a \code{R} function implementing the model to be simulated. It

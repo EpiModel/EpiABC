@@ -4,8 +4,17 @@
 \alias{abc_smc_prep}
 \title{ABC-SMC Slurm Model Preparation}
 \usage{
-abc_smc_prep(model, prior, nsims, summary_stat_target, prior_test = NULL,
-  ncores = 2, dist_weights = NULL, alpha = 0.5, ...)
+abc_smc_prep(
+  model,
+  prior,
+  nsims,
+  summary_stat_target,
+  prior_test = NULL,
+  ncores = 2,
+  dist_weights = NULL,
+  alpha = 0.5,
+  ...
+)
 }
 \arguments{
 \item{model}{a \code{R} function implementing the model to be simulated. It

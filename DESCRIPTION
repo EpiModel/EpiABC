@@ -13,7 +13,7 @@ Author: Samuel Jenness, with original ABC-SMC statistical algorithms based on th
 Maintainer: Samuel Jenness <samuel.m.jenness@emory.edu>
 License: GPL-3
 Depends: 
-    R (>= 3.2.0),
+    R (>= 3.5.0),
     abc
 Imports: 
     pls,
@@ -23,9 +23,11 @@ Imports:
     lhs,
     tensorA,
     snow,
-    stringr
+    stringr,
+    EasyABC
 Suggests:
-    Rmpi
+    Rmpi,
+    EpiModel
 LazyLoad: yes
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 Encoding: UTF-8

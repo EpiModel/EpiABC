@@ -31,5 +31,6 @@
 #' @importFrom graphics abline boxplot grid par plot points
 #' @importFrom stats density
 #' @importFrom utils tail
+#' @importFrom EasyABC ABC_sequential
 #'
 NULL

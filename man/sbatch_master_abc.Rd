@@ -4,11 +4,21 @@
 \alias{sbatch_master_abc}
 \title{Create sbatch Bash Shell Script ABC-SMC Workflow}
 \usage{
-sbatch_master_abc(input, nwaves, master.file = "master.sh",
-  runsim.file = "runsim.sh", ckpt = FALSE, append = FALSE,
-  mem = "55G", walltime = "1:00:00", user, partition.main = "csde",
-  partition.ckpt = "ckpt", account.main = "csde",
-  account.ckpt = "csde-ckpt")
+sbatch_master_abc(
+  input,
+  nwaves,
+  master.file = "master.sh",
+  runsim.file = "runsim.sh",
+  ckpt = FALSE,
+  append = FALSE,
+  mem = "55G",
+  walltime = "1:00:00",
+  user,
+  partition.main = "csde",
+  partition.ckpt = "ckpt",
+  account.main = "csde",
+  account.ckpt = "csde-ckpt"
+)
 }
 \arguments{
 \item{input}{Output object from \code{\link{abc_smc_prep}}.}
