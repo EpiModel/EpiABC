@@ -27,6 +27,10 @@ waves required for convergence).}
 
 \item{nsteps}{Number of time steps to simulate the TERGM for each refitting.}
 
+\item{coefs.vec}{Integer vector of coefficient position to refit. Implicit
+default is the full coefficient vector, but use this to
+subset fitting to selected coefficients.}
+
 \item{targets.vec}{Integer vector of target statistic position to fit to.
 Implicit default is the full target stats vector, but use
 this to subset fitting to selected targets.}
@@ -40,10 +44,6 @@ model coefficients.}
 \item{p_acc_min}{Convergence threshold for ABC waves, as a proportion of
 simulations accepted (range from 0 to 1, with lower =
 greater precision).}
-
-\item{coef.vec}{Integer vector of coefficient position to refit. Implicit
-default is the full coefficient vector, but use this to
-subset fitting to selected coefficients.}
 }
 \description{
 Refits a TERGM estimated with \code{netest} using the edges

@@ -10,7 +10,7 @@
 #'              waves required for convergence).
 #' @param ncores Number of cores for each wave of simulations.
 #' @param nsteps Number of time steps to simulate the TERGM for each refitting.
-#' @param coef.vec Integer vector of coefficient position to refit. Implicit
+#' @param coefs.vec Integer vector of coefficient position to refit. Implicit
 #'                 default is the full coefficient vector, but use this to
 #'                 subset fitting to selected coefficients.
 #' @param targets.vec Integer vector of target statistic position to fit to.
@@ -94,31 +94,32 @@ netest_refit_abc <- function(est, nsims, ncores, nsteps,
   if (ncores > parallel::detectCores()) {
     ncores <- parallel::detectCores()
   }
-  if (missing(coef.vec)) {
-    coef.vec <- seq_along(est_orig$coef.form)
+  if (missing(coefs.vec)) {
+    coefs.vec <- seq_along(est_orig$coef.form)
   }
   if (missing(targets.vec)) {
     targets.vec <- seq_along(est_orig$target.stats)
   }
 
-  save(est_orig, nsteps, coef.vec, file = "temp-refit-abc.rda")
+  save(est_orig, nsteps, coefs.vec, targets.vec, file = "temp-refit-abc.rda")
 
   myfunc <- function(x) {
     set.seed(x[1])
     # require(EpiModel)
     load("temp-refit-abc.rda")
     est_temp <- est_orig
-    est_temp$coef.form[coef.vec] <- est_temp$coef.form[coef.vec] +
-      x[2:(length(coef.vec) + 1)]
+    est_temp$coef.form[coefs.vec] <- est_temp$coef.form[coefs.vec] +
+      x[2:(length(coefs.vec) + 1)]
     dx <- EpiModel::netdx(est_temp, nsims = 1, nsteps = nsteps, verbose = FALSE)
     out <- EpiModel::get_nwstats(dx)
     out <- out[, which(!names(out) %in% c("time", "sim")), drop = FALSE]
-    out <- colMeans(out)[target.stats]
+    out <- colMeans(out)[targets.vec]
     return(out)
   }
 
   targets <- est_orig$target.stats[targets.vec]
-  n_param <- length(coef.vec)
+
+  n_param <- length(coefs.vec)
   priors <- list()
   for (ii in seq_len(n_param)) {
     priors[[ii]] <- c("unif", prior.min, prior.max)
@@ -147,7 +148,7 @@ netest_refit_abc <- function(est, nsims, ncores, nsteps,
   }
 
   est_new <- est_orig
-  est_new$coef.form[coef.vec] <- est_new$coef.form[coef.vec] + coef.adj
+  est_new$coef.form[coefs.vec] <- est_new$coef.form[coefs.vec] + coef.adj
   est_new$refit <- refit
 
   unlink("temp-refit-abc.rda")
