@@ -23,7 +23,7 @@
 #'
 #' @keywords package
 #'
-#' @import MASS mnormt parallel pls abc lhs tensorA
+#' @import MASS mnormt parallel pls abc lhs tensorA EpiModel
 #' @importFrom stats as.formula cov cov.wt lm optimize rnorm runif sd uniroot var
 #' @importFrom utils flush.console read.table write.table
 #' @importFrom stringr str_pad

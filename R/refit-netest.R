@@ -98,13 +98,13 @@ netest_refit_abc <- function(est, nsims, ncores, nsteps,
 
   myfunc <- function(x) {
     set.seed(x[1])
-    require(EpiModel)
+    # require(EpiModel)
     load("temp-refit-abc.rda")
     est_temp <- est_orig
     est_temp$coef.form[coefs.to.fit] <- est_temp$coef.form[coefs.to.fit] +
       x[2:(length(coefs.to.fit) + 1)]
-    dx <- netdx(est_temp, nsims = 1, nsteps = nsteps, verbose = FALSE)
-    out <- get_nwstats(dx)
+    dx <- EpiModel::netdx(est_temp, nsims = 1, nsteps = nsteps, verbose = FALSE)
+    out <- EpiModel::get_nwstats(dx)
     out <- out[, which(!names(out) %in% c("time", "sim")), drop = FALSE]
     out <- colMeans(out)[coefs.to.fit]
     return(out)
@@ -117,7 +117,7 @@ netest_refit_abc <- function(est, nsims, ncores, nsteps,
     priors[[ii]] <- c("unif", prior.min, prior.max)
   }
 
-  refit <- ABC_sequential(
+  refit <- EasyABC::ABC_sequential(
     method = "Lenormand",
     model = myfunc,
     prior = priors,

@@ -14,7 +14,8 @@ Maintainer: Samuel Jenness <samuel.m.jenness@emory.edu>
 License: GPL-3
 Depends: 
     R (>= 3.5.0),
-    abc
+    abc,
+    EpiModel
 Imports: 
     pls,
     mnormt,
@@ -25,9 +26,6 @@ Imports:
     snow,
     stringr,
     EasyABC
-Suggests:
-    Rmpi,
-    EpiModel
 LazyLoad: yes
 RoxygenNote: 7.1.1
 Encoding: UTF-8
