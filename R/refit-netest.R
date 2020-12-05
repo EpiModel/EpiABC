@@ -10,9 +10,12 @@
 #'              waves required for convergence).
 #' @param ncores Number of cores for each wave of simulations.
 #' @param nsteps Number of time steps to simulate the TERGM for each refitting.
-#' @param coefs.to.fit Integer vector of coefficient position to refit. Implicit
-#'                     default is the full coefficient vector, but use this to
-#'                     subset fitting to selected coefficients.
+#' @param coef.vec Integer vector of coefficient position to refit. Implicit
+#'                 default is the full coefficient vector, but use this to
+#'                 subset fitting to selected coefficients.
+#' @param targets.vec Integer vector of target statistic position to fit to.
+#'                    Implicit default is the full target stats vector, but use
+#'                    this to subset fitting to selected targets.
 #' @param prior.min Absolute lower bound of adjustment to be made across all
 #'                  model coefficients.
 #' @param prior.max Absolute upper bound of adjustment to be made across all
@@ -73,7 +76,8 @@
 #'}
 #'
 netest_refit_abc <- function(est, nsims, ncores, nsteps,
-                             coefs.to.fit,
+                             coefs.vec,
+                             targets.vec,
                              prior.min = 0, prior.max = 0,
                              p_acc_min = 0.1) {
 
@@ -90,30 +94,33 @@ netest_refit_abc <- function(est, nsims, ncores, nsteps,
   if (ncores > parallel::detectCores()) {
     ncores <- parallel::detectCores()
   }
-  if (missing(coefs.to.fit)) {
-    coefs.to.fit <- seq_along(est_orig$coef.form)
+  if (missing(coef.vec)) {
+    coef.vec <- seq_along(est_orig$coef.form)
+  }
+  if (missing(targets.vec)) {
+    targets.vec <- seq_along(est_orig$target.stats)
   }
 
-  save(est_orig, nsteps, coefs.to.fit, file = "temp-refit-abc.rda")
+  save(est_orig, nsteps, coef.vec, file = "temp-refit-abc.rda")
 
   myfunc <- function(x) {
     set.seed(x[1])
     # require(EpiModel)
     load("temp-refit-abc.rda")
     est_temp <- est_orig
-    est_temp$coef.form[coefs.to.fit] <- est_temp$coef.form[coefs.to.fit] +
-      x[2:(length(coefs.to.fit) + 1)]
+    est_temp$coef.form[coef.vec] <- est_temp$coef.form[coef.vec] +
+      x[2:(length(coef.vec) + 1)]
     dx <- EpiModel::netdx(est_temp, nsims = 1, nsteps = nsteps, verbose = FALSE)
     out <- EpiModel::get_nwstats(dx)
     out <- out[, which(!names(out) %in% c("time", "sim")), drop = FALSE]
-    out <- colMeans(out)[coefs.to.fit]
+    out <- colMeans(out)[target.stats]
     return(out)
   }
 
-  targets <- est_orig$target.stats[coefs.to.fit]
-  n_targets <- length(targets)
+  targets <- est_orig$target.stats[targets.vec]
+  n_param <- length(coef.vec)
   priors <- list()
-  for (ii in seq_len(n_targets)) {
+  for (ii in seq_len(n_param)) {
     priors[[ii]] <- c("unif", prior.min, prior.max)
   }
 
@@ -130,17 +137,17 @@ netest_refit_abc <- function(est, nsims, ncores, nsteps,
     use_seed = TRUE
   )
 
-  if (n_targets == 1) {
+  if (n_param == 1) {
     coef.adj <- sum(refit$param * refit$weights)
   } else {
-    coef.adj <- rep(NA, n_targets)
-    for (jj in seq_len(n_targets)) {
+    coef.adj <- rep(NA, n_param)
+    for (jj in seq_len(n_param)) {
       coef.adj[jj] <- sum(refit$param[, jj] * refit$weights)
     }
   }
 
   est_new <- est_orig
-  est_new$coef.form[coefs.to.fit] <- est_new$coef.form[coefs.to.fit] + coef.adj
+  est_new$coef.form[coef.vec] <- est_new$coef.form[coef.vec] + coef.adj
   est_new$refit <- refit
 
   unlink("temp-refit-abc.rda")

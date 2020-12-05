@@ -9,7 +9,8 @@ netest_refit_abc(
   nsims,
   ncores,
   nsteps,
-  coefs.to.fit,
+  coefs.vec,
+  targets.vec,
   prior.min = 0,
   prior.max = 0,
   p_acc_min = 0.1
@@ -26,9 +27,9 @@ waves required for convergence).}
 
 \item{nsteps}{Number of time steps to simulate the TERGM for each refitting.}
 
-\item{coefs.to.fit}{Integer vector of coefficient position to refit. Implicit
-default is the full coefficient vector, but use this to
-subset fitting to selected coefficients.}
+\item{targets.vec}{Integer vector of target statistic position to fit to.
+Implicit default is the full target stats vector, but use
+this to subset fitting to selected targets.}
 
 \item{prior.min}{Absolute lower bound of adjustment to be made across all
 model coefficients.}
@@ -39,6 +40,10 @@ model coefficients.}
 \item{p_acc_min}{Convergence threshold for ABC waves, as a proportion of
 simulations accepted (range from 0 to 1, with lower =
 greater precision).}
+
+\item{coef.vec}{Integer vector of coefficient position to refit. Implicit
+default is the full coefficient vector, but use this to
+subset fitting to selected coefficients.}
 }
 \description{
 Refits a TERGM estimated with \code{netest} using the edges
